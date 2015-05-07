@@ -148,6 +148,7 @@ lib LibBSON
   alias BSONIter = Iter*
 
   fun bson_free = bson_free(Void*)
+  fun bson_strfreev = bson_strfreev(UInt8**)
 
   fun bson_context_get_default = bson_context_get_default() : BSONContext
 

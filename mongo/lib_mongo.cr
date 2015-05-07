@@ -76,11 +76,11 @@ lib LibMongoC
   type ReadPrefs = Void*
 
   enum ReadMode
-    MONGOC_READ_PRIMARY             = (1 << 0)
-    MONGOC_READ_SECONDARY           = (1 << 1)
-    MONGOC_READ_PRIMARY_PREFERRED   = (1 << 2) | MONGOC_READ_PRIMARY
-    MONGOC_READ_SECONDARY_PREFERRED = (1 << 2) | MONGOC_READ_SECONDARY
-    MONGOC_READ_NEAREST             = (1 << 3) | MONGOC_READ_SECONDARY
+    READ_PRIMARY             = (1 << 0)
+    READ_SECONDARY           = (1 << 1)
+    READ_PRIMARY_PREFERRED   = (1 << 2) | READ_PRIMARY
+    READ_SECONDARY_PREFERRED = (1 << 2) | READ_SECONDARY
+    READ_NEAREST             = (1 << 3) | READ_SECONDARY
   end
 
   fun read_prefs_new = mongoc_read_prefs_new(mode: ReadMode) : ReadPrefs
@@ -94,40 +94,56 @@ lib LibMongoC
   fun read_prefs_is_valid = mongoc_read_prefs_is_valid(prefs: ReadPrefs) : Bool
 
   enum QueryFlags
-    MONGOC_QUERY_NONE              = 0
-    MONGOC_QUERY_TAILABLE_CURSOR   = 1 << 1
-    MONGOC_QUERY_SLAVE_OK          = 1 << 2
-    MONGOC_QUERY_OPLOG_REPLAY      = 1 << 3
-    MONGOC_QUERY_NO_CURSOR_TIMEOUT = 1 << 4
-    MONGOC_QUERY_AWAIT_DATA        = 1 << 5
-    MONGOC_QUERY_EXHAUST           = 1 << 6
-    MONGOC_QUERY_PARTIAL           = 1 << 7
+    QUERY_NONE              = 0
+    QUERY_TAILABLE_CURSOR   = 1 << 1
+    QUERY_SLAVE_OK          = 1 << 2
+    QUERY_OPLOG_REPLAY      = 1 << 3
+    QUERY_NO_CURSOR_TIMEOUT = 1 << 4
+    QUERY_AWAIT_DATA        = 1 << 5
+    QUERY_EXHAUST           = 1 << 6
+    QUERY_PARTIAL           = 1 << 7
   end
 
   enum InsertFlags
-    MONGOC_INSERT_NONE              = 0
-    MONGOC_INSERT_CONTINUE_ON_ERROR = 1 << 0
+    INSERT_NONE              = 0
+    INSERT_CONTINUE_ON_ERROR = 1 << 0
   end
 
   enum UpdateFlags
-    MONGOC_UPDATE_NONE         = 0
-    MONGOC_UPDATE_UPSERT       = 1 << 0
-    MONGOC_UPDATE_MULTI_UPDATE = 1 << 1
+    UPDATE_NONE         = 0
+    UPDATE_UPSERT       = 1 << 0
+    UPDATE_MULTI_UPDATE = 1 << 1
   end
 
   enum DeleteFlags
-    MONGOC_DELETE_NONE          = 0
-    MONGOC_DELETE_SINGLE_REMOVE = 1 << 0
+    DELETE_NONE          = 0
+    DELETE_SINGLE_REMOVE = 1 << 0
   end
 
   enum RemoveFlags
-    MONGOC_REMOVE_NONE          = 0
-    MONGOC_REMOVE_SINGLE_REMOVE = 1 << 0
+    REMOVE_NONE          = 0
+    REMOVE_SINGLE_REMOVE = 1 << 0
   end
 
-  type IndexOpt = Void*
+  struct IndexOpt
+    is_initialized: Bool
+    background: Bool
+    unique: Bool
+    name: UInt8*
+    drop_dups: Bool
+    sparse: Bool
+    expire_after_seconds: Int32
+    v: Int32
+    weights: BSON
+    default_language: UInt8*
+    language_override: UInt8*
+    geo_options: Void* # FIXME
+    storage_options: Void* #FIXME
+    padding: Void*[6]
+  end
 
-  fun index_opt_get_default = mongoc_index_opt_get_default(): IndexOpt
+  fun index_opt_get_default = mongoc_index_opt_get_default(): IndexOpt*
+  fun index_opt_init = mongoc_index_opt_init(opt: IndexOpt*)
 
   type BulkOperation = Void*
 
@@ -174,7 +190,7 @@ lib LibMongoC
   fun collection_drop = mongoc_collection_drop(collection: Collection, error: BSONError) : Bool
   fun collection_drop_index = mongoc_collection_drop_index(collection: Collection, index_name: UInt8*,
                                                            error: BSONError) : Bool
-  fun collection_create_index = mongoc_collection_create_index(collection: Collection, key: BSON,
+  fun collection_create_index = mongoc_collection_create_index(collection: Collection, keys: BSON,
                                                                opt: IndexOpt, error: BSONError) : Bool
   fun collection_ensure_index = mongoc_collection_ensure_index(collection: Collection, keys: BSON,
                                                                opt: IndexOpt, error: BSON) : Bool
@@ -182,9 +198,8 @@ lib LibMongoC
   fun collection_find = mongoc_collection_find(collection: Collection, flags: QueryFlags, skip: UInt32, limit: UInt32,
                                                batch_size: UInt32, query: BSON, fields: BSON,
                                                prefs: ReadPrefs) : Cursor
-  fun collection_insert = mongoc_collection_insert(collection: Collection, flags: InsertFlags, documents: BSON*,
-                                                   n_documents: UInt32, write_concern: WriteConcern,
-                                                   error: BSONError) : Bool
+  fun collection_insert = mongoc_collection_insert(collection: Collection, flags: InsertFlags, document: BSON,
+                                                   write_concern: WriteConcern, error: BSONError) : Bool
   fun collection_insert_bulk = mongoc_collection_insert_bulk(collection: Collection, flags: InsertFlags,
                                                              documents: BSON*, n_documents: UInt32,
                                                              write_concern: WriteConcern, error: BSONError) : Bool
