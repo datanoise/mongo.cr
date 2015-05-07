@@ -21,23 +21,25 @@ lib LibMongoC
   fun mongoc_write_concern_get_wmajority = mongoc_write_concern_get_wmajority(write_concern: MongoWriteConcern): Bool
   fun mongoc_write_concern_set_wmajority = mongoc_write_concern_set_wmajority(write_concern: MongoWriteConcern, value: Int32)
 
-  type MongoUri = Void*
-
-  BSON_HOST_NAME_MAX = 255
+  BSON_HOST_NAME_MAX = 255 + 1
+  BSON_HOST_NAME_AND_PORT_MAX = 255 + 7
 
   struct HostList
     next: HostList*
-    host: UInt8[BSON_HOST_NAME_MAX + 1]
-    host_and_port: UInt8[BSON_HOST_NAME_MAX + 7]
+    host: UInt8[BSON_HOST_NAME_MAX]
+    host_and_port: UInt8[BSON_HOST_NAME_AND_PORT_MAX]
     port: UInt16
     family: Int32
     padding: Void*[4]
   end
 
   alias MongoHostList = HostList*
+  type MongoUri = Void*
 
+  fun mongoc_uri_copy = mongoc_uri_copy(uri: MongoUri) : MongoUri
+  fun mongoc_uri_destroy = mongoc_uri_destroy(uri: MongoUri)
   fun mongoc_uri_new = mongoc_uri_new(uri_string: UInt8*) : MongoUri
-  fun mongoc_uri_for_host_port = mongoc_uri_for_host_port(host: UInt8*, port: UInt16) : MongoUri
+  fun mongoc_uri_new_for_host_port = mongoc_uri_new_for_host_port(host: UInt8*, port: UInt16) : MongoUri
   fun mongoc_uri_get_hosts = mongoc_uri_get_hosts(uri: MongoUri) : MongoHostList
   fun mongoc_uri_get_database = mongoc_uri_get_database(uri: MongoUri) : UInt8*
   fun mongoc_uri_get_options = mongoc_uri_get_options(uri: MongoUri) : LibBSON::BSON

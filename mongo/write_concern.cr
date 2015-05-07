@@ -40,7 +40,7 @@ class Mongo::WriteConcern
 
   def wtag
     cstr = LibMongoC.mongoc_write_concern_get_wtag(self)
-    String.new(cstr)
+    String.new(cstr) unless cstr.nil?
   end
 
   def wtag=(value)
@@ -65,5 +65,15 @@ class Mongo::WriteConcern
 
   def to_unsafe
     @handle
+  end
+
+  def to_s(io)
+    io << "WriteConcern: "
+    io << "fsync: #{fsync}, "
+    io << "journal: #{journal}, "
+    io << "w: #{w}, "
+    io << "wtag: #{wtag}, "
+    io << "wtimeout: #{wtimeout}, "
+    io << "wmajority: #{wmajority}"
   end
 end
