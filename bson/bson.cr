@@ -330,6 +330,11 @@ class BSON
     new(handle)
   end
 
+  def self.copy_from(data: LibBSON::BSON)
+    handle = LibBSON.bson_copy(data)
+    new(handle)
+  end
+
   protected def invalidate
     @valid = false
   end
