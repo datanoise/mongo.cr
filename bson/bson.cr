@@ -412,7 +412,7 @@ class BSON
     value(key) { raise IndexOutOfBounds.new }
   end
 
-  def fetch(key)
+  def fetch(key: String)
     if LibBSON.bson_iter_init_find(out iter, handle, key.cstr)
       value = LibBSON.bson_iter_value(pointerof(iter))
       Value.new(value).value
@@ -421,11 +421,11 @@ class BSON
     end
   end
 
-  def []?(key)
+  def []?(key: String)
     fetch(key) { nil }
   end
 
-  def [](key)
+  def [](key: String)
     fetch(key) { raise IndexOutOfBounds.new }
   end
 

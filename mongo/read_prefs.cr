@@ -1,5 +1,5 @@
 class Mongo::ReadPrefs
-  def initialize(@handle = LibMongoC::ReadPrefs)
+  def initialize(@handle: LibMongoC::ReadPrefs)
     raise "unable to initialize ReadPrefs" if @handle.nil?
   end
 
@@ -33,11 +33,11 @@ class Mongo::ReadPrefs
   end
 
   def tags=(tags)
-    LibMongoC.read_prefs_set_tags(self, tags)
+    LibMongoC.read_prefs_set_tags(self, tags.to_bson)
   end
 
   def add_tag(tag)
-    LibMongoC.read_prefs_add_tag(self, tag)
+    LibMongoC.read_prefs_add_tag(self, tag.to_bson)
   end
 
   def valid?
@@ -46,5 +46,12 @@ class Mongo::ReadPrefs
 
   def to_unsafe
     @handle
+  end
+
+  def to_s(io)
+    io << "ReadPrefs: "
+    io << "mode: #{mode}, "
+    io << "tags: #{tags}, "
+    io << "valid?: #{valid?}"
   end
 end

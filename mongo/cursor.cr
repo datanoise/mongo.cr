@@ -20,16 +20,23 @@ class Mongo::Cursor
     LibMongoC.cursor_destroy(self)
   end
 
+  private def check_closed
+    raise "cursor is closed" if @closed
+  end
+
   def clone
+    check_closed
     handle = LibMongoC.cursor_clone(self)
     Cursor.new handle
   end
 
   def more
+    check_closed
     LibMongoC.cursor_more(self)
   end
 
   def next
+    check_closed
     if LibMongoC.cursor_next(self, @data)
       check_error
       @current = BSON.copy_from @data.value
@@ -37,6 +44,7 @@ class Mongo::Cursor
   end
 
   def each
+    check_closed
     while v = self.next
       yield v
     end
@@ -49,35 +57,43 @@ class Mongo::Cursor
   end
 
   def host
-    hosts = Host.hosts(LibMongoC.cursor_get_host(self))
-    hosts.first
+    check_closed
+    LibMongoC.cursor_get_host(self, out hosts)
+    Host.hosts(pointerof(hosts)).first
   end
 
-  def alive
+  def alive?
+    return false if @closed
     LibMongoC.cursor_is_alive(self)
   end
 
   def current
+    check_closed
     @current
   end
 
   def batch_size
+    check_closed
     LibMongoC.cursor_get_batch_size(self)
   end
 
   def batch_size=(size)
+    check_closed
     LibMongoC.cursor_set_batch_size(self, size.to_u32)
   end
 
   def hint
+    check_closed
     LibMongoC.cursor_get_hint(self)
   end
 
   def id
+    check_closed
     LibMongoC.cursor_get_id(self)
   end
 
   def to_unsafe
+    check_closed
     @handle
   end
 end

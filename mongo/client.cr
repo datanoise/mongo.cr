@@ -103,7 +103,7 @@ class Mongo::Client
     ReadPrefs.new LibMongoC.client_get_read_prefs(self)
   end
 
-  def read_prefs=(value)
+  def read_prefs=(value: ReadPrefs)
     LibMongoC.client_set_read_prefs(self, value)
   end
 
