@@ -21,39 +21,39 @@ class Mongo::Database
 
   def remove_all_users
     unless LibMongoC.database_remove_all_users(self, out error)
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
   end
 
   def add_user(username, password, roles = nil, custom_data = nil)
     unless LibMongoC.database_add_user(self, username, password, roles, custom_data, out error)
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
   end
 
   def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
               skip = 0, limit = 0, batch_size = 0, pref = nil)
     Cursor.new LibMongoC.database_command(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
-                                          command, fields, prefs)
+                                          command.to_bson, fields.to_bson, prefs)
   end
 
   def command_simple(command, prefs = nil)
-    unless LibMongoC.database_command_simple(self, command, prefs, out reply, out error)
-      raise BSONError.new(error)
+    unless LibMongoC.database_command_simple(self, command.to_bson, prefs, out reply, out error)
+      raise BSON::BSONError.new(error)
     end
-    BSON.copy_from reply
+    BSON.copy_from pointerof(reply)
   end
 
   def drop
     unless LibMongoC.database_drop(self, out error)
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
   end
 
   def has_collection?(name)
     unless LibMongoC.database_has_collection(self, name, out error)
       unless error.code == 0
-        raise BSONError.new(error)
+        raise BSON::BSONError.new(error)
       end
       return false
     end
@@ -63,7 +63,7 @@ class Mongo::Database
   def create_collection(name, options = nil)
    col = LibMongoC.database_create_collection(self, name, options, out error)
    unless col
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
    end
    Collection.new col
   end
@@ -85,17 +85,17 @@ class Mongo::Database
   end
 
   def find_collections(filter)
-    cur = LibMongoC.database_find_collections(self, filter, out error)
+    cur = LibMongoC.database_find_collections(self, filter.to_bson, out error)
     unless cur
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
     Cursor.new cur
   end
 
-  def get_collection_names
+  def collection_names
     names = LibMongoC.database_get_collection_names(self, out error)
     unless names
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
     ret = [] of String
     count = 0
@@ -105,6 +105,7 @@ class Mongo::Database
       ret << String.new(cur)
       count += 1
     end
+    LibBSON.bson_strfreev(names)
     ret
   end
 

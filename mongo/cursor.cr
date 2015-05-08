@@ -5,9 +5,18 @@ require "./host"
 class Mongo::Cursor
   def initialize(@handle: LibMongoC::Cursor)
     @data = Pointer(LibBSON::BSON).malloc(1)
+    @closed = false
   end
 
+  include Enumerable(BSON)
+
   def finalize
+    close
+  end
+
+  def close
+    return if @closed
+    @closed = true
     LibMongoC.cursor_destroy(self)
   end
 
@@ -21,9 +30,15 @@ class Mongo::Cursor
   end
 
   def next
-    if LibMongoC.cursor_next(self, pointerof(@data))
+    if LibMongoC.cursor_next(self, @data)
       check_error
-      @current = BSON.copy_from @data
+      @current = BSON.copy_from @data.value
+    end
+  end
+
+  def each
+    while v = self.next
+      yield v
     end
   end
 

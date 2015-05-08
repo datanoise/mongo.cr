@@ -33,9 +33,9 @@ class Mongo::Client
 
   def command_simple(db_name, command, prefs = nil)
     unless LibMongoC.client_command_simple(self, db_name, command, prefs, out reply, out error)
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
-    BSON.copy_from reply
+    BSON.copy_from pointerof(reply)
   end
 
   def database(name)
@@ -53,7 +53,7 @@ class Mongo::Client
   def database_names
     names = LibMongoC.client_get_database_names(self, out error)
     unless names
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
     ret = [] of String
     count = 0
@@ -63,22 +63,24 @@ class Mongo::Client
       ret << String.new(cur)
       count += 1
     end
+    LibBSON.bson_strfreev(names)
     ret
   end
 
   def find_databases
     cur = LibMongoC.client_find_databases(self, out error)
+    puts cur
     unless cur
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
     Cursor.new cur
   end
 
   def server_status(prefs = nil)
     unless LibMongoC.client_get_server_status(self, prefs, out reply, out error)
-      raise BSONError.new(error)
+      raise BSON::BSONError.new(error)
     end
-    BSON.copy_from reply
+    BSON.copy_from pointerof(reply)
   end
 
   def max_message_size

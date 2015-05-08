@@ -12,30 +12,32 @@ class Mongo::Collection
 
   def aggregate(pipeline, flags = LibMongoC::QueryFlags::QUERY_NONE,
                 options = BSON.new, prefs = nil)
-    Cursor.new LibMongoC.collection_aggregate(self, flags, pipeline, options, prefs)
+    Cursor.new LibMongoC.collection_aggregate(self, flags, pipeline.to_bson, options, prefs)
   end
 
   def command(command, fields, flags = LibMongoC::QueryFlags::QUERY_NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
-    Cursor.new LibMongoC.collection_command(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
-                                            command, fields, prefs)
+    Cursor.new LibMongoC.collection_command(self, flags, skip.to_u32,
+                                            limit.to_u32, batch_size.to_u32,
+                                            command.to_bson, fields.to_bson, prefs)
   end
 
   def command_simple(command, prefs = nil)
-    if LibMongoC.collection_command_simple(self, command, out reply, out error)
-      BSON.copy_from reply
+    if LibMongoC.collection_command_simple(self, command.to_bson, out reply, out error)
+      BSON.copy_from pointerof(reply)
     else
       raise BSON::BSONError.new(error)
     end
   end
 
-  def count(query, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def count(query = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
             skip = 0, limit = 0, opts = nil, prefs = nil)
     ret =
       if opts
-        LibMongoC.collection_count_with_opts(self, flags, query, skip.to_u32, limit.to_u32, opts, prefs, out error)
+        LibMongoC.collection_count_with_opts(self, flags, query.to_bson, skip.to_i64,
+                                             limit.to_i64, opts.to_bson, prefs, out error)
       else
-        LibMongoC.collection_count(self, flags, query, skip.to_u32, limit.to_u32, prefs, out error)
+        LibMongoC.collection_count(self, flags, query.to_bson, skip.to_i64, limit.to_i64, prefs, out error)
       end
     if ret == -1
       raise BSON::BSONError.new(error)
@@ -56,13 +58,13 @@ class Mongo::Collection
   end
 
   def create_index(keys, opt = IndexOpt.new)
-    unless LibMongoC.collection_create_index(self, keys, opt, out error)
+    unless LibMongoC.collection_create_index(self, keys.to_bson, opt, out error)
       raise BSON::BSONError.new(error)
     end
   end
 
   def ensure_index(keys, opt = IndexOpt.new)
-    unless LibMongoC.collection_ensure_index(self, keys, opt, out error)
+    unless LibMongoC.collection_ensure_index(self, keys.to_bson, opt, out error)
       raise BSON::BSONError.new(error)
     end
   end
@@ -74,14 +76,14 @@ class Mongo::Collection
     Cursor.new cursor
   end
 
-  def find(query, fields, flags = LibMongoC::QueryFlags::QUERY_NONE, skip = 0, limit = 0,
+  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE, skip = 0, limit = 0,
            batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.collection_find(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
-                                         query, fields, prefs)
+                                         query.to_bson, fields.to_bson, prefs)
   end
 
   def insert(document, flags = LibMongoC::QueryFlags::QUERY_NONE, write_concern = nil)
-    unless LibMongoC.collection_insert(self, flags, document, write_concern, out error)
+    unless LibMongoC.collection_insert(self, flags, document.to_bson, write_concern, out error)
       raise BSON::BSONError.new(error)
     end
   end
@@ -89,32 +91,32 @@ class Mongo::Collection
   def insert_bulk(documents, flags = LibMongoC::QueryFlags::QUERY_NONE, write_concern = nil)
     return if documents.empty?
 
-    docs = Pointer(LibBSON::BSON).malloc(documents.length) {|idx| documents[idx].to_unsafe}
+    docs = Pointer(LibBSON::BSON).malloc(documents.length) {|idx| documents[idx].to_bson.to_unsafe}
     unless LibMongoC.collection_insert_bulk(self, flags, docs, documents.length.to_u32, write_concern, out error)
       raise BSON::BSONError.new(error)
     end
   end
 
   def update(selector, update, flags = LibMongoC::QueryFlags::QUERY_NONE, write_concern = nil)
-    unless LibMongoC.collection_update(self, flags, selector, update, write_concern, out error)
+    unless LibMongoC.collection_update(self, flags, selector.to_bson, update.to_bson, write_concern, out error)
       raise BSON::BSONError.new(error)
     end
   end
 
   def delete(selector, flags = LibMongoC::DeleteFlags::DELETE_NONE, write_concern = nil)
-    unless LibMongoC.collection_delete(self, flags, selector, write_concern, out error)
+    unless LibMongoC.collection_delete(self, flags, selector.to_bson, write_concern, out error)
       raise BSON::BSONError.new(error)
     end
   end
 
   def save(document, write_concern = nil)
-    unless LibMongoC.collection_save(self, document, write_concern, out error)
+    unless LibMongoC.collection_save(self, document.to_bson, write_concern, out error)
       raise BSON::BSONError.new(error)
     end
   end
 
-  def remove(selector, flags = LibMongoC::RemoveFlags::REMOVE_NONE, write_concern)
-    unless LibMongoC.collection_remove(self, flags, selector, write_concern, out error)
+  def remove(selector, flags = LibMongoC::RemoveFlags::REMOVE_NONE, write_concern = nil)
+    unless LibMongoC.collection_remove(self, flags, selector.to_bson, write_concern, out error)
       raise BSON::BSONError.new(error)
     end
   end
@@ -126,17 +128,18 @@ class Mongo::Collection
   end
 
   def find_and_modify(query, update, sort = nil, fields = nil, remove = false, upsert = false, new = false)
-    unless LibMongoC.collection_find_and_modify(self, query, sort, update, fields, remove, upsert, new, out reply, out error)
+    unless LibMongoC.collection_find_and_modify(self, query.to_bson, sort.to_bson,
+        update.to_bson, fields.to_bson, remove, upsert, new, out reply, out error)
       raise BSON::BSONError.new(error)
     end
-    BSON.copy_from reply
+    BSON.copy_from pointerof(reply)
   end
 
   def stats(options = nil)
-    unless LibMongoC.collection_stats(self, options, out reply, out error)
+    unless LibMongoC.collection_stats(self, options.to_bson, out reply, out error)
       raise BSON::BSONError.new(error)
     end
-    BSON.copy_from reply
+    BSON.copy_from pointerof(reply)
   end
 
   def read_prefs
@@ -170,10 +173,10 @@ class Mongo::Collection
   end
 
   def validate(options = nil)
-    unless LibMongoC.collection_validate(self, options, out reply, out error)
+    unless LibMongoC.collection_validate(self, options.to_bson, out reply, out error)
       raise BSON::BSONError.new(error)
     end
-    BSON.copy_from reply
+    BSON.copy_from pointerof(reply)
   end
 
   def to_unsafe

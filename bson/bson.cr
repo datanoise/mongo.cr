@@ -4,12 +4,15 @@ require "../shims/regex"
 
 class BSON
   class BSONError < Exception
-    def initialize(@domain, @code, @msg)
-      super("Domain: #{@domain}, code: #{@code}, #{@msg}")
-    end
+    getter domain
+    getter code
+    getter detail
 
-    def new(bson_error)
-      new(bson_error.domain, bson_error.code, bson_error.message)
+    def initialize(bson_error)
+      @domain = bson_error.domain
+      @code = bson_error.code
+      @detail = String.new bson_error.message.to_unsafe
+      super("Domain: #{@domain}, code: #{@code}, #{@detail}")
     end
   end
 
@@ -196,6 +199,8 @@ class BSON
   end
 
   struct Value
+    getter handle
+
     def initialize(src: LibBSON::BSONValue)
       LibBSON.bson_value_copy(src, out dst)
       @handle = dst
@@ -227,7 +232,7 @@ class BSON
       when LibBSON::Type::BSON_TYPE_BOOL
         v.v_bool
       when LibBSON::Type::BSON_TYPE_DATE_TIME
-        Time.new(v.v_datetime, Time::Kind::Utc)
+        Time.new(v.v_datetime / 1000 * TimeSpan::TicksPerSecond + Time::UnixEpoch, Time::Kind::Utc)
       when LibBSON::Type::BSON_TYPE_NULL
         nil
       when LibBSON::Type::BSON_TYPE_REGEX
@@ -388,6 +393,23 @@ class BSON
     BSON.new LibBSON.bson_copy(self)
   end
 
+  def value(key)
+    if LibBSON.bson_iter_init_find(out iter, handle, key.cstr)
+      value = LibBSON.bson_iter_value(pointerof(iter))
+      Value.new(value)
+    else
+      yield key
+    end
+  end
+
+  def value?(key)
+    value(key) { nil }
+  end
+
+  def value(key)
+    value(key) { raise IndexOutOfBounds.new }
+  end
+
   def fetch(key)
     if LibBSON.bson_iter_init_find(out iter, handle, key.cstr)
       value = LibBSON.bson_iter_value(pointerof(iter))
@@ -451,7 +473,7 @@ class BSON
   end
 
   def []=(key, value: Time)
-    LibBSON.bson_append_date_time(handle, key.cstr, key.bytesize, value.to_utc.ticks)
+    LibBSON.bson_append_date_time(handle, key.cstr, key.bytesize, value.to_utc.to_i)
   end
 
   def []=(key, value: Timestamp)
@@ -545,5 +567,43 @@ class BSON
 
   def to_unsafe
     handle
+  end
+
+  def to_s(io)
+    io << to_json
+  end
+
+  def inspect(io)
+    to_s(io)
+  end
+
+  def to_bson
+    self
+  end
+end
+
+class Array(T)
+  def to_bson
+    bson = BSON.new
+    each_with_index do |item, i|
+      bson[i.to_s] = item
+    end
+    bson
+  end
+end
+
+class Hash(K, V)
+  def to_bson
+    bson = BSON.new
+    each do |k, v|
+      bson[k.to_s] = v
+    end
+    bson
+  end
+end
+
+struct Nil
+  def to_bson
+    self
   end
 end

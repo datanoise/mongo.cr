@@ -2,6 +2,18 @@ require "../bson/lib_bson"
 
 @[Link("mongoc-1.0")]
 lib LibMongoC
+  enum LogLevel
+    ERROR
+    CRITICAL
+    WARNING
+    MESSAGE
+    INFO
+    DEBUG
+    TRACE
+  end
+
+  fun log_set_handler = mongoc_log_set_handler((LogLevel, UInt8*, UInt8*, Void*) ->, Void*)
+
   alias BSON = LibBSON::BSON
   alias BSONError = LibBSON::BSONError
 
@@ -64,7 +76,7 @@ lib LibMongoC
   fun cursor_destroy = mongoc_cursor_destroy(cursor: Cursor)
   fun cursor_more = mongoc_cursor_more(cursor: Cursor) : Bool
   fun cursor_next = mongoc_cursor_next(cursor: Cursor, bson: BSON*) : Bool
-  fun cursor_error = mongoc_cursor_error(cursor: Cursor, error: BSONError) : Bool
+  fun cursor_error = mongoc_cursor_error(cursor: Cursor, error: BSONError*) : Bool
   fun cursor_get_host = mongoc_cursor_get_host(cursor: Cursor, host: HostList)
   fun cursor_is_alive = mongoc_cursor_is_alive(cursor: Cursor) : Bool
   fun cursor_current = mongoc_cursor_current(cursor: Cursor) : BSON
@@ -150,7 +162,7 @@ lib LibMongoC
   fun bulk_operation_new = mongoc_bulk_operation_new(ordered: Bool) : BulkOperation
   fun bulk_operation_destroy = mongoc_bulk_operation_destroy(bulk: BulkOperation)
   fun bulk_operation_execute = mongoc_bulk_operation_execute(bulk: BulkOperation, reply: BSON,
-                                                             error: BSONError) : UInt32
+                                                             error: BSONError*) : UInt32
   fun bulk_operation_remove = mongoc_bulk_operation_remove(bulk: BulkOperation, selector: BSON)
   fun bulk_operation_insert = mongoc_bulk_operation_insert(bulk: BulkOperation, document: BSON)
   fun bulk_operation_remove_one = mongoc_bulk_operation_remove_one(bulk: BulkOperation, selector: BSON)
@@ -179,49 +191,49 @@ lib LibMongoC
                                                      prefs: ReadPrefs) : Cursor
   fun collection_command_simple = mongoc_collection_command_simple(collection: Collection, command: BSON,
                                                                    prefs: ReadPrefs, reply: BSON,
-                                                                   error: BSONError) : Bool
+                                                                   error: BSONError*) : Bool
   fun collection_count = mongoc_collection_count(collection: Collection, flags: QueryFlags, query: BSON,
                                                  skip: Int64, limit: Int64, prefs: ReadPrefs,
-                                                 error: BSONError) : Int64
+                                                 error: BSONError*) : Int64
   fun collection_count_with_opts = mongoc_collection_count_with_opts(collection: Collection, flags: QueryFlags,
                                                                      query: BSON, skip: Int64, limit: Int64,
                                                                      opts: BSON, prefs: ReadPrefs,
-                                                                     error: BSONError) : Int64
-  fun collection_drop = mongoc_collection_drop(collection: Collection, error: BSONError) : Bool
+                                                                     error: BSONError*) : Int64
+  fun collection_drop = mongoc_collection_drop(collection: Collection, error: BSONError*) : Bool
   fun collection_drop_index = mongoc_collection_drop_index(collection: Collection, index_name: UInt8*,
-                                                           error: BSONError) : Bool
+                                                           error: BSONError*) : Bool
   fun collection_create_index = mongoc_collection_create_index(collection: Collection, keys: BSON,
-                                                               opt: IndexOpt, error: BSONError) : Bool
+                                                               opt: IndexOpt, error: BSONError*) : Bool
   fun collection_ensure_index = mongoc_collection_ensure_index(collection: Collection, keys: BSON,
                                                                opt: IndexOpt, error: BSON) : Bool
-  fun collection_find_indexes = mongoc_collection_find_indexes(collection: Collection, error: BSONError) : Cursor
+  fun collection_find_indexes = mongoc_collection_find_indexes(collection: Collection, error: BSONError*) : Cursor
   fun collection_find = mongoc_collection_find(collection: Collection, flags: QueryFlags, skip: UInt32, limit: UInt32,
                                                batch_size: UInt32, query: BSON, fields: BSON,
                                                prefs: ReadPrefs) : Cursor
   fun collection_insert = mongoc_collection_insert(collection: Collection, flags: InsertFlags, document: BSON,
-                                                   write_concern: WriteConcern, error: BSONError) : Bool
+                                                   write_concern: WriteConcern, error: BSONError*) : Bool
   fun collection_insert_bulk = mongoc_collection_insert_bulk(collection: Collection, flags: InsertFlags,
                                                              documents: BSON*, n_documents: UInt32,
-                                                             write_concern: WriteConcern, error: BSONError) : Bool
+                                                             write_concern: WriteConcern, error: BSONError*) : Bool
   fun collection_update = mongoc_collection_update(collection: Collection, flags: UpdateFlags, selector: BSON,
                                                    update: BSON, write_concern: WriteConcern,
-                                                   error: BSONError) : Bool
+                                                   error: BSONError*) : Bool
   fun collection_delete = mongoc_collection_delete(collection: Collection, flags: DeleteFlags, selector: BSON,
-                                                   write_concern: WriteConcern, error: BSONError) : Bool
+                                                   write_concern: WriteConcern, error: BSONError*) : Bool
   fun collection_save = mongoc_collection_save(collection: Collection, document: BSON,
-                                               write_concern: WriteConcern, error: BSONError) : Bool
+                                               write_concern: WriteConcern, error: BSONError*) : Bool
   fun collection_remove = mongoc_collection_remove(collection: Collection, flags: RemoveFlags,
                                                    selector: BSON, write_concern: WriteConcern,
-                                                   error: BSONError) : Bool
+                                                   error: BSONError*) : Bool
   fun collection_rename = mongoc_collection_rename(collection: Collection, new_db: UInt8*, new_name: UInt8*,
-                                                   drop_target_before_rename: Bool, error: BSONError) : Bool
+                                                   drop_target_before_rename: Bool, error: BSONError*) : Bool
   fun collection_find_and_modify = mongoc_collection_find_and_modify(collection: Collection, query: BSON,
                                                                      sort: BSON, update: BSON,
                                                                      fields: BSON, remove: Bool, upsert: Bool,
                                                                      new: Bool, reply: BSON,
-                                                                     error: BSONError) : Bool
+                                                                     error: BSONError*) : Bool
   fun collection_stats = mongoc_collection_stats(collection: Collection, options: BSON, reply: BSON,
-                                                 error: BSONError) : Bool
+                                                 error: BSONError*) : Bool
   fun collection_create_bulk_operation = mongoc_collection_create_bulk_operation(collection: Collection, ordered: Bool,
                                                                                  write_concern: WriteConcern) : BulkOperation
   fun collection_get_read_prefs = mongoc_collection_get_read_prefs(collection: Collection) : ReadPrefs
@@ -232,30 +244,30 @@ lib LibMongoC
   fun collection_get_last_error = mongoc_collection_get_last_error(collection: Collection) : BSON
   fun collection_keys_to_index_string = mongoc_collection_keys_to_index_string(keys: BSON) : UInt8*
   fun collection_validate = mongoc_collection_validate(collection: Collection, options: BSON, reply: BSON,
-                                                       error: BSONError) : Bool
+                                                       error: BSONError*) : Bool
 
   type Database = Void*
 
   fun database_get_name = mongoc_database_get_name(db: Database) : UInt8*
-  fun database_remove_user = mongoc_database_remove_user(db: Database, username: UInt8*, error: BSONError) : Bool
-  fun database_remove_all_users = mongoc_database_remove_all_users(db: Database, error: BSONError) : Bool
+  fun database_remove_user = mongoc_database_remove_user(db: Database, username: UInt8*, error: BSONError*) : Bool
+  fun database_remove_all_users = mongoc_database_remove_all_users(db: Database, error: BSONError*) : Bool
   fun database_add_user = mongoc_database_add_user(db: Database, username: UInt8*, password: UInt8*,
-                                                   roles: BSON, custom_data: BSON, error: BSONError) : Bool
+                                                   roles: BSON, custom_data: BSON, error: BSONError*) : Bool
   fun database_destroy = mongoc_database_destroy(db: Database)
   fun database_command = mongoc_database_command(db: Database, flags: QueryFlags, skip: UInt32, limit: UInt32,
                                                  batch_size: UInt32, command: BSON, fields: BSON, prefs: ReadPrefs) : Cursor
   fun database_command_simple = mongoc_database_command_simple(db: Database, command: BSON, prefs: ReadPrefs,
-                                                               reply: BSON, error: BSONError) : Bool
-  fun database_drop = mongoc_database_drop(db: Database, error: BSONError) : Bool
-  fun database_has_collection = mongoc_database_has_collection(db: Database, name: UInt8*, error: BSONError) : Bool
+                                                               reply: BSON, error: BSONError*) : Bool
+  fun database_drop = mongoc_database_drop(db: Database, error: BSONError*) : Bool
+  fun database_has_collection = mongoc_database_has_collection(db: Database, name: UInt8*, error: BSONError*) : Bool
   fun database_create_collection = mongoc_database_create_collection(db: Database, name: UInt8*, options: BSON,
-                                                                     error: BSONError) : Collection
+                                                                     error: BSONError*) : Collection
   fun database_get_read_prefs = mongoc_database_get_read_prefs(db: Database) : ReadPrefs
   fun database_set_read_prefs = mongoc_database_set_read_prefs(db: Database, prefs: ReadPrefs)
   fun database_get_write_concern = mongoc_database_get_write_concern(db: Database) : WriteConcern
   fun database_set_write_concern = mongoc_database_set_write_concern(db: Database, write_concern: WriteConcern)
-  fun database_find_collections = mongoc_database_find_collections(db: Database, filter: BSON, error: BSONError) : Cursor
-  fun database_get_collection_names = mongoc_database_get_collection_names(db: Database, error: BSONError): UInt8**
+  fun database_find_collections = mongoc_database_find_collections(db: Database, filter: BSON, error: BSONError*) : Cursor
+  fun database_get_collection_names = mongoc_database_get_collection_names(db: Database, error: BSONError*): UInt8**
   fun database_get_collection = mongoc_database_get_collection(db: Database, name: UInt8*): Collection
 
   type Client = Void*
@@ -268,14 +280,14 @@ lib LibMongoC
                                              query: BSON, fields: BSON, prefs: ReadPrefs) : Cursor
   fun client_kill_cursor = mongoc_client_kill_cursor(client: Client, cursor_id: Int64)
   fun client_command_simple = mongoc_client_command_simple(client: Client, db_name: UInt8*, command: BSON,
-                                                           prefs: ReadPrefs, reply: BSON, error: BSONError) : Bool
+                                                           prefs: ReadPrefs, reply: BSON, error: BSONError*) : Bool
   fun client_destroy = mongoc_client_destroy(client: Client)
   fun client_get_database = mongoc_client_get_database(client: Client, name: UInt8*) : Database
   fun client_get_collection = mongoc_client_get_collection(client: Client, db: UInt8*, collection: UInt8*) : Collection
-  fun client_get_database_names = mongoc_client_get_database_names(client: Client, error: BSONError) : UInt8**
-  fun client_find_databases = mongoc_client_find_databases(client: Client, error: BSONError) : Cursor
+  fun client_get_database_names = mongoc_client_get_database_names(client: Client, error: BSONError*) : UInt8**
+  fun client_find_databases = mongoc_client_find_databases(client: Client, error: BSONError*) : Cursor
   fun client_get_server_status = mongoc_client_get_server_status(client: Client, prefs: ReadPrefs,
-                                                                 reply: BSON, error: BSONError) : Bool
+                                                                 reply: BSON, error: BSONError*) : Bool
   fun client_get_max_message_size = mongoc_client_get_max_message_size(client: Client) : Int32
   fun client_get_max_bson_size = mongoc_client_get_max_bson_size(client: Client) : Int32
   fun client_get_write_concern = mongoc_client_get_write_concern(client: Client) : WriteConcern
