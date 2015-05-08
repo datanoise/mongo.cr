@@ -82,13 +82,13 @@ class Mongo::Collection
                                          query.to_bson, fields.to_bson, prefs)
   end
 
-  def insert(document, flags = LibMongoC::QueryFlags::QUERY_NONE, write_concern = nil)
+  def insert(document, flags = LibMongoC::InsertFlags::INSERT_NONE, write_concern = nil)
     unless LibMongoC.collection_insert(self, flags, document.to_bson, write_concern, out error)
       raise BSON::BSONError.new(error)
     end
   end
 
-  def insert_bulk(documents, flags = LibMongoC::QueryFlags::QUERY_NONE, write_concern = nil)
+  def insert_bulk(documents, flags = LibMongoC::InsertFlags::INSERT_NONE, write_concern = nil)
     return if documents.empty?
 
     docs = Pointer(LibBSON::BSON).malloc(documents.length) {|idx| documents[idx].to_bson.to_unsafe}
