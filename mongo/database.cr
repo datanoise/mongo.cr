@@ -34,7 +34,7 @@ class Mongo::Database
   def users
     cmd = BSON.new
     cmd["usersInfo"] = 1
-    res = command(cmd).next
+    res = command_simple(cmd)
     if res && (users = res["users"]) && users.is_a?(BSON)
       users
     end
@@ -93,7 +93,7 @@ class Mongo::Database
     LibMongoC.database_set_write_concern(self, value)
   end
 
-  def find_collections(filter)
+  def find_collections(filter = BSON.new)
     cur = LibMongoC.database_find_collections(self, filter.to_bson, out error)
     unless cur
       raise BSON::BSONError.new(error)

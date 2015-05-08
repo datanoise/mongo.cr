@@ -9,10 +9,24 @@ describe Mongo::Database do
     db.name.should eq(db_name)
   end
 
+  it "should be able to creata a collection" do
+    client = Mongo::Client.new("mongodb://localhost")
+    db = client["my_db_#{Time.now.to_i}"]
+    db.create_collection("my_col")
+
+    db.has_collection?("my_col").should be_true
+
+    col = db.find_collections.next.not_nil!
+    col["name"].should eq("my_col")
+
+    db.collection_names.includes?("my_col").should be_true
+
+    db.drop
+  end
+
   it "should be able to manage users" do
     client = Mongo::Client.new("mongodb://localhost")
-    # db = client["my_db_#{Time.now.to_i}"]
-    db = client["my_db"]
+    db = client["my_db_#{Time.now.to_i}"]
     db.add_user("new_user", "new_pass")
     db["my_col"].insert(BSON.new)
     user = db.users.not_nil!["0"]
@@ -24,5 +38,35 @@ describe Mongo::Database do
     db.remove_user("new_user")
     db.users.not_nil!.empty?.should be_true
     db.drop
+  end
+
+  it "should be able to modify write_concern" do
+    client = Mongo::Client.new("mongodb://localhost")
+    db = client["my_db_#{Time.now.to_i}"]
+    db.write_concern.fsync.should be_false
+    db.write_concern.fsync = true
+    db.write_concern.fsync.should be_true
+    write_concern = Mongo::WriteConcern.new
+    write_concern.journal = true
+    db.write_concern = write_concern
+    db.write_concern.journal.should be_true
+  end
+
+  it "should be able to modify read preferences" do
+    client = Mongo::Client.new("mongodb://localhost")
+    db = client["my_db_#{Time.now.to_i}"]
+    db.read_prefs.mode.should eq(LibMongoC::ReadMode::READ_PRIMARY)
+    tag = BSON.new
+    tag["name"] = "my_tag"
+    db.read_prefs.add_tag tag
+    tag = db.read_prefs.tags["0"]
+    fail("expected an array") unless tag.is_a?(BSON)
+    tag["name"].should eq("my_tag")
+
+    read_prefs = Mongo::ReadPrefs.new
+    read_prefs.mode = LibMongoC::ReadMode::READ_PRIMARY_PREFERRED
+
+    db.read_prefs = read_prefs
+    db.read_prefs.mode.should eq(LibMongoC::ReadMode::READ_PRIMARY_PREFERRED)
   end
 end
