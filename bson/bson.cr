@@ -232,7 +232,9 @@ class BSON
       when LibBSON::Type::BSON_TYPE_BOOL
         v.v_bool
       when LibBSON::Type::BSON_TYPE_DATE_TIME
-        Time.new(v.v_datetime / 1000 * TimeSpan::TicksPerSecond + Time::UnixEpoch, Time::Kind::Utc)
+        spec = LibC::TimeSpec.new
+        spec.tv_sec = v.v_datetime / 1000
+        Time.new(spec, Time::Kind::Utc)
       when LibBSON::Type::BSON_TYPE_NULL
         nil
       when LibBSON::Type::BSON_TYPE_REGEX
@@ -473,7 +475,7 @@ class BSON
   end
 
   def []=(key, value: Time)
-    LibBSON.bson_append_date_time(handle, key.cstr, key.bytesize, value.to_utc.to_i)
+    LibBSON.bson_append_date_time(handle, key.cstr, key.bytesize, value.to_utc.to_i * 1000)
   end
 
   def []=(key, value: Timestamp)

@@ -186,7 +186,12 @@ describe BSON do
     t = Time.now
     bson = BSON.new
     bson["time"] = t
-    bson["time"].should eq(t.to_utc)
+    bson_t = bson["time"]
+    if bson_t.is_a?(Time)
+      bson_t.to_i.should eq(t.to_utc.to_i)
+    else
+      fail "expected Time"
+    end
   end
 
   it "should be able to append timestamp" do
@@ -246,9 +251,9 @@ describe BSON do
 
   it "should be comparable" do
     bson1 = BSON.new
-    bson1["x"] = Time.now
+    bson1["x"] = 1
     bson2 = BSON.new
-    bson2["x"] = (Time.now + 2.seconds)
+    bson2["x"] = 2
     bson2.should be > bson1
   end
 
