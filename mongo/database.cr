@@ -26,13 +26,22 @@ class Mongo::Database
   end
 
   def add_user(username, password, roles = nil, custom_data = nil)
-    unless LibMongoC.database_add_user(self, username, password, roles, custom_data, out error)
+    unless LibMongoC.database_add_user(self, username, password, roles.to_bson, custom_data.to_bson, out error)
       raise BSON::BSONError.new(error)
     end
   end
 
+  def users
+    cmd = BSON.new
+    cmd["usersInfo"] = 1
+    res = command(cmd).next
+    if res && (users = res["users"]) && users.is_a?(BSON)
+      users
+    end
+  end
+
   def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
-              skip = 0, limit = 0, batch_size = 0, pref = nil)
+              skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.database_command(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
                                           command.to_bson, fields.to_bson, prefs)
   end

@@ -69,7 +69,6 @@ class Mongo::Client
 
   def find_databases
     cur = LibMongoC.client_find_databases(self, out error)
-    puts cur
     unless cur
       raise BSON::BSONError.new(error)
     end
