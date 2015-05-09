@@ -40,7 +40,7 @@ class Mongo::Collection
     if LibMongoC.collection_command_simple(self, command.to_bson, out reply, out error)
       BSON.copy_from pointerof(reply)
     else
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
@@ -54,38 +54,38 @@ class Mongo::Collection
         LibMongoC.collection_count(self, flags, query.to_bson, skip.to_i64, limit.to_i64, prefs, out error)
       end
     if ret == -1
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     ret
   end
 
   def drop
     unless LibMongoC.collection_drop(self, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def drop_index(index_name)
     unless LibMongoC.collection_drop_index(self, index_name, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def create_index(keys, opt = IndexOpt.new)
     unless LibMongoC.collection_create_index(self, keys.to_bson, opt, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def ensure_index(keys, opt = IndexOpt.new)
     unless LibMongoC.collection_ensure_index(self, keys.to_bson, opt, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def find_indexes
     unless cursor = LibMongoC.collection_find_indexes(self, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     Cursor.new cursor
   end
@@ -111,7 +111,7 @@ class Mongo::Collection
 
   def insert(document, flags = LibMongoC::InsertFlags::INSERT_NONE, write_concern = nil)
     unless LibMongoC.collection_insert(self, flags, document.to_bson, write_concern, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
@@ -120,38 +120,38 @@ class Mongo::Collection
 
     docs = Pointer(LibBSON::BSON).malloc(documents.length) {|idx| documents[idx].to_bson.to_unsafe}
     unless LibMongoC.collection_insert_bulk(self, flags, docs, documents.length.to_u32, write_concern, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def update(selector, update, flags = LibMongoC::QueryFlags::QUERY_NONE, write_concern = nil)
     unless LibMongoC.collection_update(self, flags, selector.to_bson, update.to_bson, write_concern, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def save(document, write_concern = nil)
     unless LibMongoC.collection_save(self, document.to_bson, write_concern, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def remove(selector, flags = LibMongoC::RemoveFlags::REMOVE_NONE, write_concern = nil)
     unless LibMongoC.collection_remove(self, flags, selector.to_bson, write_concern, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def rename(new_db, new_name, drop_target_before_rename = false)
     unless LibMongoC.collection_rename(self, new_db, new_name, drop_target_before_rename, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 
   def find_and_modify(query, update, sort = nil, fields = nil, remove = false, upsert = false, new = false)
     unless LibMongoC.collection_find_and_modify(self, query.to_bson, sort.to_bson,
         update.to_bson, fields.to_bson, remove, upsert, new, out reply, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     doc = BSON.copy_from pointerof(reply)
     value = doc["value"]
@@ -161,7 +161,7 @@ class Mongo::Collection
 
   def stats(options = nil)
     unless LibMongoC.collection_stats(self, options.to_bson, out reply, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     BSON.copy_from pointerof(reply)
   end
@@ -198,7 +198,7 @@ class Mongo::Collection
 
   def validate(options = nil)
     unless LibMongoC.collection_validate(self, options.to_bson, out reply, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     BSON.copy_from pointerof(reply)
   end

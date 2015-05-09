@@ -52,7 +52,7 @@ class Mongo::Cursor
 
   private def check_error
     if LibMongoC.cursor_error(self, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
   end
 

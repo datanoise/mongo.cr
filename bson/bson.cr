@@ -8,9 +8,9 @@ class BSON
     getter detail
 
     def initialize(bson_error)
-      @domain = bson_error.domain
-      @code = bson_error.code
-      @detail = String.new bson_error.message.to_unsafe
+      @domain = bson_error.value.domain
+      @code = bson_error.value.code
+      @detail = String.new bson_error.value.message.to_unsafe
       super("Domain: #{@domain}, code: #{@code}, #{@detail}")
     end
   end
@@ -357,7 +357,7 @@ class BSON
   def self.from_json(json)
     handle = LibBSON.bson_new_from_json(json.cstr, json.bytesize, out error)
     if error
-      raise BSONError.new(error)
+      raise BSONError.new(pointerof(error))
     end
     new(handle)
   end

@@ -40,7 +40,7 @@ class Mongo::Client
 
   def command_simple(db_name, command, prefs = nil)
     unless LibMongoC.client_command_simple(self, db_name, command, prefs, out reply, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     BSON.copy_from pointerof(reply)
   end
@@ -60,7 +60,7 @@ class Mongo::Client
   def database_names
     names = LibMongoC.client_get_database_names(self, out error)
     unless names
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     ret = [] of String
     count = 0
@@ -77,7 +77,7 @@ class Mongo::Client
   def find_databases
     cur = LibMongoC.client_find_databases(self, out error)
     unless cur
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     Cursor.new cur
   end
@@ -90,7 +90,7 @@ class Mongo::Client
 
   def server_status(prefs = nil)
     unless LibMongoC.client_get_server_status(self, prefs, out reply, out error)
-      raise BSON::BSONError.new(error)
+      raise BSON::BSONError.new(pointerof(error))
     end
     BSON.copy_from pointerof(reply)
   end

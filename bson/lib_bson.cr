@@ -154,7 +154,7 @@ lib LibBSON
 
   fun bson_new = bson_new() : BSON
   fun bson_new_from_json = bson_new_from_json(data: UInt8*, len: Int32, error: BSONError*) : BSON
-  fun bson_init_from_json = bson_new_from_json(bson: BSON, data: UInt8*, len: Int32, error: BSONError) : BSON
+  fun bson_init_from_json = bson_new_from_json(bson: BSON, data: UInt8*, len: Int32, error: BSONError*) : BSON
   fun bson_new_from_data = bson_new_from_data(data: UInt8*, length: Int32) : BSON
   fun bson_destroy = bson_destroy(bson: BSON)
   fun bson_get_data = bson_get_data(bson: BSON) : UInt8*
