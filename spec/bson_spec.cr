@@ -154,10 +154,10 @@ describe BSON do
     bson = BSON.new
     bson["v"] = 1
     bson.append_array("ary") do |child|
-      child["0"] = "a1"
-      child["1"] = "a2"
-      child["2"] = nil
-      child["3"] = 1
+      child << "a1"
+      child << "a2"
+      child << nil
+      child << 1
     end
 
     ary = bson["ary"]
@@ -208,7 +208,7 @@ describe BSON do
     val = bson["re"]
     if val.is_a?(Regex)
       val.source.should eq(re.source)
-      val.modifiers.should eq(re.modifiers)
+      val.options.should eq(re.options)
     else
       fail "expected regex value"
     end
@@ -294,5 +294,45 @@ describe BSON do
 
     copy = bson.clone
     copy.should eq(bson)
+  end
+
+  it "should be able to convert Hash to BSON" do
+    query = [{"$match" => {"status" => "A"}},
+             {"$group" => {"_id" => "$cust_id", "total" => {"$sum" => "$amount"}}}]
+    bson_query = query.to_bson
+    elem1 = bson_query["0"]
+    fail "expected BSON" unless elem1.is_a?(BSON)
+    match = elem1["$match"]
+    fail "expected BSON" unless match.is_a?(BSON)
+    match["status"].should eq("A")
+  end
+
+  it "should be able to detect array type" do
+    ary = ["a", "b", "c"]
+    ary.to_bson.array?.should be_true
+  end
+
+  it "should be able to decode bson" do
+    bson = BSON.new
+    bson["x"] = 42
+    bson.append_array("ary") do |child|
+      child << 1
+      child << 2
+      child << 3
+    end
+    bson.append_document("doc") do |child|
+      child["y"] = "text"
+    end
+    h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
+    bson.decode.should eq(h)
+  end
+
+  it "should be able to encode to bson" do
+    h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
+    bson = h.to_bson
+    bson["x"].should eq(42)
+    ary = bson["ary"]
+    fail "expected BSON" unless ary.is_a?(BSON)
+    ary["0"].should eq(1)
   end
 end

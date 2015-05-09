@@ -3,23 +3,37 @@ require "./index_opt"
 require "./read_prefs"
 
 class Mongo::Collection
-  def initialize(@handle: LibMongoC::Collection)
+  getter database
+
+  def initialize(@database, @handle: LibMongoC::Collection)
   end
 
   def finalize
     LibMongoC.collection_destroy(self)
   end
 
-  def aggregate(pipeline, flags = LibMongoC::QueryFlags::QUERY_NONE,
-                options = BSON.new, prefs = nil)
+  def aggregate(pipeline, flags = LibMongoC::QueryFlags::QUERY_NONE, options = BSON.new, prefs = nil)
     Cursor.new LibMongoC.collection_aggregate(self, flags, pipeline.to_bson, options, prefs)
   end
 
-  def command(command, fields, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def aggregate(pipeline, flags = LibMongoC::QueryFlags::QUERY_NONE, options = BSON.new, prefs = nil)
+    aggregate(pipeline, flags, options, prefs).each do |doc|
+      yield doc
+    end
+  end
+
+  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.collection_command(self, flags, skip.to_u32,
                                             limit.to_u32, batch_size.to_u32,
                                             command.to_bson, fields.to_bson, prefs)
+  end
+
+  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+              skip = 0, limit = 0, batch_size = 0, prefs = nil)
+    command(command, fields, flags, skip, limit, batch_size, prefs).each do |doc|
+      yield doc
+    end
   end
 
   def command_simple(command, prefs = nil)
@@ -69,17 +83,30 @@ class Mongo::Collection
     end
   end
 
-  def find_indexes()
+  def find_indexes
     unless cursor = LibMongoC.collection_find_indexes(self, out error)
       raise BSON::BSONError.new(error)
     end
     Cursor.new cursor
   end
 
-  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE, skip = 0, limit = 0,
-           batch_size = 0, prefs = nil)
+  def find_indexes
+    find_indexes.each do |doc|
+      yield doc
+    end
+  end
+
+  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+           skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.collection_find(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
                                          query.to_bson, fields.to_bson, prefs)
+  end
+
+  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+           skip = 0, limit = 0, batch_size = 0, prefs = nil)
+    find(query, fields, flags, skip, limit, batch_size, prefs).each do |doc|
+      yield doc
+    end
   end
 
   def insert(document, flags = LibMongoC::InsertFlags::INSERT_NONE, write_concern = nil)
@@ -99,12 +126,6 @@ class Mongo::Collection
 
   def update(selector, update, flags = LibMongoC::QueryFlags::QUERY_NONE, write_concern = nil)
     unless LibMongoC.collection_update(self, flags, selector.to_bson, update.to_bson, write_concern, out error)
-      raise BSON::BSONError.new(error)
-    end
-  end
-
-  def delete(selector, flags = LibMongoC::DeleteFlags::DELETE_NONE, write_concern = nil)
-    unless LibMongoC.collection_delete(self, flags, selector.to_bson, write_concern, out error)
       raise BSON::BSONError.new(error)
     end
   end
@@ -132,7 +153,10 @@ class Mongo::Collection
         update.to_bson, fields.to_bson, remove, upsert, new, out reply, out error)
       raise BSON::BSONError.new(error)
     end
-    BSON.copy_from pointerof(reply)
+    doc = BSON.copy_from pointerof(reply)
+    value = doc["value"]
+    return nil unless value.is_a?(BSON)
+    value
   end
 
   def stats(options = nil)
@@ -147,7 +171,7 @@ class Mongo::Collection
   end
 
   def read_prefs=(value)
-    LibMongoC.collection_set_read_prefs(self, read_prefs)
+    LibMongoC.collection_set_read_prefs(self, value)
   end
 
   def write_concern

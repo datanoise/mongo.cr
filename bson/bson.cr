@@ -1,6 +1,5 @@
 require "./lib_bson"
 require "../shims/time"
-require "../shims/regex"
 
 class BSON
   class BSONError < Exception
@@ -239,11 +238,11 @@ class BSON
         nil
       when LibBSON::Type::BSON_TYPE_REGEX
         opts = String.new(v.v_regex.options)
-        modifiers = 0
-        modifiers |= Regex::IGNORE_CASE if opts.index('i')
-        modifiers |= Regex::MULTILINE if opts.index('m')
-        modifiers |= Regex::EXTENDED if opts.index('x')
-        modifiers |= Regex::UTF_8 if opts.index('u')
+        modifiers = Regex::Options::None
+        modifiers |= Regex::Options::IGNORE_CASE if opts.index('i')
+        modifiers |= Regex::Options::MULTILINE if opts.index('m')
+        modifiers |= Regex::Options::EXTENDED if opts.index('x')
+        modifiers |= Regex::Options::UTF_8 if opts.index('u')
         Regex.new(String.new(v.v_regex.regex), modifiers)
       when LibBSON::Type::BSON_TYPE_DBPOINTER
         raise "Deprecated BSON_TYPE_DBPOINTER type must not be used"
@@ -305,6 +304,37 @@ class BSON
 
     def rewind
       LibBSON.bson_iter_init(@iter, @bson)
+      self
+    end
+  end
+
+  struct IterKey
+    include Iterator(String)
+
+    def initialize(@bson)
+      @iter = Pointer(LibBSON::Iter).malloc(1)
+      rewind
+    end
+
+    def next
+      return stop unless LibBSON.bson_iter_next(@iter)
+      String.new LibBSON.bson_iter_key(@iter)
+    end
+
+    def rewind
+      LibBSON.bson_iter_init(@iter, @bson)
+      self
+    end
+  end
+
+  struct ArrayAppender
+    def initialize(@bson)
+      @count = 0
+    end
+
+    def <<(value)
+      @bson[@count.to_s] = value
+      @count += 1
       self
     end
   end
@@ -495,14 +525,14 @@ class BSON
   end
 
   def []=(key, value: Regex)
-    modifiers = value.modifiers
+    modifiers = value.options
     options =
       if modifiers
         String.build do |buf|
-          buf << "i" unless modifiers & Regex::IGNORE_CASE == 0
-          buf << "m" unless modifiers & Regex::MULTILINE == 0
-          buf << "x" unless modifiers & Regex::EXTENDED == 0
-          buf << "u" unless modifiers & Regex::UTF_8 == 0
+          buf << "i" if modifiers.includes? Regex::Options::IGNORE_CASE
+          buf << "m" if modifiers.includes? Regex::Options::MULTILINE
+          buf << "x" if modifiers.includes? Regex::Options::EXTENDED
+          buf << "u" if modifiers.includes? Regex::Options::UTF_8
         end
       else
         ""
@@ -530,7 +560,7 @@ class BSON
     end
     child = BSON.new(pointerof(child_handle))
     begin
-      yield child
+      yield ArrayAppender.new(child), child
     ensure
       LibBSON.bson_append_array_end(handle, child)
       child.invalidate
@@ -567,6 +597,18 @@ class BSON
     IterPair.new(self)
   end
 
+  def each_key
+    LibBSON.bson_iter_init(out iter, handle)
+    while LibBSON.bson_iter_next(pointerof(iter))
+      key = LibBSON.bson_iter_key(pointerof(iter))
+      yield String.new(key)
+    end
+  end
+
+  def each_key
+    IterKey.new(self)
+  end
+
   def to_unsafe
     handle
   end
@@ -582,23 +624,88 @@ class BSON
   def to_bson
     self
   end
+
+  alias Field = Nil         |
+               Int32        |
+               Int64        |
+               Binary       |
+               Bool         |
+               Float32      |
+               Float64      |
+               MinKey       |
+               MaxKey       |
+               ObjectId     |
+               String       |
+               Symbol       |
+               Time         |
+               Timestamp    |
+               Code         |
+               BSON         |
+               Regex        |
+               Array(Field) |
+               Hash(String, Field)
+
+  def decode
+    if array?
+      each_with_object([] of Field) {|v, res| res << decode_value(v.value)}
+    else
+      each_pair.each_with_object({} of String => Field) {|pair, h| h[pair[0]] = decode_value(pair[1].value)}
+    end
+  end
+
+  private def decode_value(v)
+    case v
+    when BSON
+      v.decode
+    else
+      v
+    end
+  end
+
+  def array?
+    count = -1
+    each_key.all? do |k|
+      count += 1
+      k == count.to_s
+    end
+  end
 end
 
 class Array(T)
-  def to_bson
-    bson = BSON.new
+  def to_bson(bson = BSON.new)
     each_with_index do |item, i|
-      bson[i.to_s] = item
+      case item
+      when Array
+        bson.append_array(i.to_s) do |appender, child|
+          item.to_bson(child)
+        end
+      when Hash
+        bson.append_document(i.to_s) do |child|
+          item.to_bson(child)
+        end
+      else
+        bson[i.to_s] = item
+      end
     end
     bson
   end
 end
 
 class Hash(K, V)
-  def to_bson
-    bson = BSON.new
+  def to_bson(bson = BSON.new)
     each do |k, v|
-      bson[k.to_s] = v
+      case v
+      when Array
+        bson.append_array(k) do |appender, child|
+          v.to_bson(child)
+        end
+      when Hash
+        bson.append_document(k) do |child|
+          v.to_bson(child)
+        end
+      else
+        bson[k] = v
+      end
     end
     bson
   end

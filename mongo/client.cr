@@ -27,6 +27,13 @@ class Mongo::Client
                                         query, fields, prefs)
   end
 
+  def command(db_name, query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+              skip = 0, limit = 0, batch_size = 0, prefs = nil)
+    command(db_name, query, fields, flags, skip, limit, batch_size, prefs).each do |doc|
+      yield doc
+    end
+  end
+
   def kill_cursor(cursor_id)
     LibMongoC.client_kill_cursor(self, cursor_id.to_i64)
   end
@@ -39,7 +46,7 @@ class Mongo::Client
   end
 
   def database(name)
-    Database.new LibMongoC.client_get_database(self, name)
+    Database.new self, LibMongoC.client_get_database(self, name)
   end
 
   def [](name)
@@ -47,7 +54,7 @@ class Mongo::Client
   end
 
   def collection(db_name, collection_name)
-    Collection.new LibMongoC.client_get_collection(self, db_name, collection_name)
+    database(db_name).collection(collection_name)
   end
 
   def database_names
@@ -73,6 +80,12 @@ class Mongo::Client
       raise BSON::BSONError.new(error)
     end
     Cursor.new cur
+  end
+
+  def find_databases
+    find_databases.each do |doc|
+      yield doc
+    end
   end
 
   def server_status(prefs = nil)

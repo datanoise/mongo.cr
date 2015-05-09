@@ -203,9 +203,9 @@ lib LibMongoC
   fun collection_drop_index = mongoc_collection_drop_index(collection: Collection, index_name: UInt8*,
                                                            error: BSONError*) : Bool
   fun collection_create_index = mongoc_collection_create_index(collection: Collection, keys: BSON,
-                                                               opt: IndexOpt, error: BSONError*) : Bool
+                                                               opt: IndexOpt*, error: BSONError*) : Bool
   fun collection_ensure_index = mongoc_collection_ensure_index(collection: Collection, keys: BSON,
-                                                               opt: IndexOpt, error: BSON) : Bool
+                                                               opt: IndexOpt*, error: BSON) : Bool
   fun collection_find_indexes = mongoc_collection_find_indexes(collection: Collection, error: BSONError*) : Cursor
   fun collection_find = mongoc_collection_find(collection: Collection, flags: QueryFlags, skip: UInt32, limit: UInt32,
                                                batch_size: UInt32, query: BSON, fields: BSON,
@@ -218,8 +218,6 @@ lib LibMongoC
   fun collection_update = mongoc_collection_update(collection: Collection, flags: UpdateFlags, selector: BSON,
                                                    update: BSON, write_concern: WriteConcern,
                                                    error: BSONError*) : Bool
-  fun collection_delete = mongoc_collection_delete(collection: Collection, flags: DeleteFlags, selector: BSON,
-                                                   write_concern: WriteConcern, error: BSONError*) : Bool
   fun collection_save = mongoc_collection_save(collection: Collection, document: BSON,
                                                write_concern: WriteConcern, error: BSONError*) : Bool
   fun collection_remove = mongoc_collection_remove(collection: Collection, flags: RemoveFlags,

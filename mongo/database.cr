@@ -1,5 +1,7 @@
 class Mongo::Database
-  def initialize(@handle = LibMongoC::Database)
+  getter client
+
+  def initialize(@client, @handle = LibMongoC::Database)
     unless @handle
       raise "Unable to initialize Database"
     end
@@ -46,6 +48,13 @@ class Mongo::Database
                                           command.to_bson, fields.to_bson, prefs)
   end
 
+  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+              skip = 0, limit = 0, batch_size = 0, prefs = nil)
+    command(command, fields, flags, skip, limit, batch_size, prefs).each do |doc|
+      yield doc
+    end
+  end
+
   def command_simple(command, prefs = nil)
     unless LibMongoC.database_command_simple(self, command.to_bson, prefs, out reply, out error)
       raise BSON::BSONError.new(error)
@@ -74,7 +83,7 @@ class Mongo::Database
    unless col
       raise BSON::BSONError.new(error)
    end
-   Collection.new col
+   Collection.new self, col
   end
 
   def read_prefs
@@ -101,6 +110,12 @@ class Mongo::Database
     Cursor.new cur
   end
 
+  def find_collections(filter = BSON.new)
+    find_collections(filter).each do |doc|
+      yield doc
+    end
+  end
+
   def collection_names
     names = LibMongoC.database_get_collection_names(self, out error)
     unless names
@@ -119,7 +134,7 @@ class Mongo::Database
   end
 
   def collection(name)
-    Collection.new LibMongoC.database_get_collection(self, name)
+    Collection.new self, LibMongoC.database_get_collection(self, name)
   end
 
   def [](name)
