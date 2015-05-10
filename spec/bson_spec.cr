@@ -1,4 +1,4 @@
-require "../src/bson/bson"
+require "../src/bson"
 require "spec"
 
 macro expect_value(v)
