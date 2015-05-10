@@ -3,7 +3,7 @@ class Mongo::ReadPrefs
     raise "unable to initialize ReadPrefs" if @handle.nil?
   end
 
-  def initialize(mode = LibMongoC::ReadMode::READ_PRIMARY : LibMongoC::ReadMode)
+  def initialize(mode = LibMongoC::ReadMode::PRIMARY : LibMongoC::ReadMode)
     initialize LibMongoC.read_prefs_new(mode)
   end
 

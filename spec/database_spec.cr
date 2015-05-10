@@ -55,7 +55,7 @@ describe Mongo::Database do
   it "should be able to modify read preferences" do
     client = Mongo::Client.new("mongodb://localhost")
     db = client["my_db_#{Time.now.to_i}"]
-    db.read_prefs.mode.should eq(LibMongoC::ReadMode::READ_PRIMARY)
+    db.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY)
     tag = BSON.new
     tag["name"] = "my_tag"
     db.read_prefs.add_tag tag
@@ -64,9 +64,9 @@ describe Mongo::Database do
     tag["name"].should eq("my_tag")
 
     read_prefs = Mongo::ReadPrefs.new
-    read_prefs.mode = LibMongoC::ReadMode::READ_PRIMARY_PREFERRED
+    read_prefs.mode = LibMongoC::ReadMode::PRIMARY_PREFERRED
 
     db.read_prefs = read_prefs
-    db.read_prefs.mode.should eq(LibMongoC::ReadMode::READ_PRIMARY_PREFERRED)
+    db.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY_PREFERRED)
   end
 end

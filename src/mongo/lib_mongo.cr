@@ -88,11 +88,11 @@ lib LibMongoC
   type ReadPrefs = Void*
 
   enum ReadMode
-    READ_PRIMARY             = (1 << 0)
-    READ_SECONDARY           = (1 << 1)
-    READ_PRIMARY_PREFERRED   = (1 << 2) | READ_PRIMARY
-    READ_SECONDARY_PREFERRED = (1 << 2) | READ_SECONDARY
-    READ_NEAREST             = (1 << 3) | READ_SECONDARY
+    PRIMARY             = (1 << 0)
+    SECONDARY           = (1 << 1)
+    PRIMARY_PREFERRED   = (1 << 2) | PRIMARY
+    SECONDARY_PREFERRED = (1 << 2) | SECONDARY
+    NEAREST             = (1 << 3) | SECONDARY
   end
 
   fun read_prefs_new = mongoc_read_prefs_new(mode: ReadMode) : ReadPrefs
@@ -106,35 +106,30 @@ lib LibMongoC
   fun read_prefs_is_valid = mongoc_read_prefs_is_valid(prefs: ReadPrefs) : Bool
 
   enum QueryFlags
-    QUERY_NONE              = 0
-    QUERY_TAILABLE_CURSOR   = 1 << 1
-    QUERY_SLAVE_OK          = 1 << 2
-    QUERY_OPLOG_REPLAY      = 1 << 3
-    QUERY_NO_CURSOR_TIMEOUT = 1 << 4
-    QUERY_AWAIT_DATA        = 1 << 5
-    QUERY_EXHAUST           = 1 << 6
-    QUERY_PARTIAL           = 1 << 7
+    NONE              = 0
+    TAILABLE_CURSOR   = 1 << 1
+    SLAVE_OK          = 1 << 2
+    OPLOG_REPLAY      = 1 << 3
+    NO_CURSOR_TIMEOUT = 1 << 4
+    AWAIT_DATA        = 1 << 5
+    EXHAUST           = 1 << 6
+    PARTIAL           = 1 << 7
   end
 
   enum InsertFlags
-    INSERT_NONE              = 0
-    INSERT_CONTINUE_ON_ERROR = 1 << 0
+    NONE              = 0
+    CONTINUE_ON_ERROR = 1 << 0
   end
 
   enum UpdateFlags
-    UPDATE_NONE         = 0
-    UPDATE_UPSERT       = 1 << 0
-    UPDATE_MULTI_UPDATE = 1 << 1
-  end
-
-  enum DeleteFlags
-    DELETE_NONE          = 0
-    DELETE_SINGLE_REMOVE = 1 << 0
+    NONE         = 0
+    UPSERT       = 1 << 0
+    MULTI_UPDATE = 1 << 1
   end
 
   enum RemoveFlags
-    REMOVE_NONE          = 0
-    REMOVE_SINGLE_REMOVE = 1 << 0
+    NONE          = 0
+    SINGLE_REMOVE = 1 << 0
   end
 
   struct IndexOpt

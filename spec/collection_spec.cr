@@ -106,7 +106,7 @@ describe Mongo::Collection do
 
   it "should be able to modify read preferences" do
     with_collection do |col|
-      col.read_prefs.mode.should eq(LibMongoC::ReadMode::READ_PRIMARY)
+      col.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY)
       tag = BSON.new
       tag["name"] = "my_tag"
       col.read_prefs.add_tag tag
@@ -115,10 +115,10 @@ describe Mongo::Collection do
       tag["name"].should eq("my_tag")
 
       read_prefs = Mongo::ReadPrefs.new
-      read_prefs.mode = LibMongoC::ReadMode::READ_PRIMARY_PREFERRED
+      read_prefs.mode = LibMongoC::ReadMode::PRIMARY_PREFERRED
 
       col.read_prefs = read_prefs
-      col.read_prefs.mode.should eq(LibMongoC::ReadMode::READ_PRIMARY_PREFERRED)
+      col.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY_PREFERRED)
     end
   end
 

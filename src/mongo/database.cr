@@ -48,7 +48,7 @@ class Mongo::Database
   end
 
   # This method shall execute a command on a database.
-  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.database_command(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
                                           command.to_bson, fields.to_bson, prefs)
@@ -56,7 +56,7 @@ class Mongo::Database
 
   # This method shall execute a command on a database.
   # The result is passed to the specified block.
-  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     command(command, fields, flags, skip, limit, batch_size, prefs).each do |doc|
       yield doc

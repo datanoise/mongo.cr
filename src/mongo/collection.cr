@@ -13,20 +13,20 @@ class Mongo::Collection
   end
 
   # This method shall execute an aggregation query on the underlying 'Collection'
-  def aggregate(pipeline, flags = LibMongoC::QueryFlags::QUERY_NONE, options = BSON.new, prefs = nil)
+  def aggregate(pipeline, flags = LibMongoC::QueryFlags::NONE, options = BSON.new, prefs = nil)
     Cursor.new LibMongoC.collection_aggregate(self, flags, pipeline.to_bson, options, prefs)
   end
 
   # This method shall execute an aggregation query on the underlying 'Collection'
   # The results are passed to the specified block.
-  def aggregate(pipeline, flags = LibMongoC::QueryFlags::QUERY_NONE, options = BSON.new, prefs = nil)
+  def aggregate(pipeline, flags = LibMongoC::QueryFlags::NONE, options = BSON.new, prefs = nil)
     aggregate(pipeline, flags, options, prefs).each do |doc|
       yield doc
     end
   end
 
   # This method shall execute a command on a collection.
-  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.collection_command(self, flags, skip.to_u32,
                                             limit.to_u32, batch_size.to_u32,
@@ -35,7 +35,7 @@ class Mongo::Collection
 
   # This method shall execute a command on a collection.
   # The results are passed to the specified block.
-  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     command(command, fields, flags, skip, limit, batch_size, prefs).each do |doc|
       yield doc
@@ -52,7 +52,7 @@ class Mongo::Collection
   end
 
   # Counts the number of documents matching the specified criteria.
-  def count(query = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def count(query = BSON.new, flags = LibMongoC::QueryFlags::NONE,
             skip = 0, limit = 0, opts = nil, prefs = nil)
     ret =
       if opts
@@ -112,7 +112,7 @@ class Mongo::Collection
   # {a:1}. If you would like to specify options such as a sort order, the query
   # must be placed inside of {"$query": {}} as specified by the server
   # documentation.
-  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
            skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.collection_find(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
                                          query.to_bson, fields.to_bson, prefs)
@@ -124,7 +124,7 @@ class Mongo::Collection
   # must be placed inside of {"$query": {}} as specified by the server
   # documentation.
   # The results are passed to the specified block.
-  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
            skip = 0, limit = 0, batch_size = 0, prefs = nil)
     find(query, fields, flags, skip, limit, batch_size, prefs).each do |doc|
       yield doc
@@ -134,13 +134,13 @@ class Mongo::Collection
   # This method shall insert document into collection.  If no _id element is
   # found in document, then a Oid will be generated locally and added to the
   # document.  You can retrieve a generated _id from `last_error` method.
-  def insert(document, flags = LibMongoC::InsertFlags::INSERT_NONE, write_concern = nil)
+  def insert(document, flags = LibMongoC::InsertFlags::NONE, write_concern = nil)
     unless LibMongoC.collection_insert(self, flags, document.to_bson, write_concern, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
   end
 
-  def insert_bulk(documents, flags = LibMongoC::InsertFlags::INSERT_NONE, write_concern = nil)
+  def insert_bulk(documents, flags = LibMongoC::InsertFlags::NONE, write_concern = nil)
     return if documents.empty?
 
     docs = Pointer(LibBSON::BSON).malloc(documents.length) {|idx| documents[idx].to_bson.to_unsafe}
@@ -152,7 +152,7 @@ class Mongo::Collection
   # This method shall update documents in collection that match selector.  By
   # default, updates only a single document. Set flags to `UPDATE_MULTI_UPDATE`
   # to update multiple documents.
-  def update(selector, update, flags = LibMongoC::UpdateFlags::UPDATE_NONE, write_concern = nil)
+  def update(selector, update, flags = LibMongoC::UpdateFlags::NONE, write_concern = nil)
     unless LibMongoC.collection_update(self, flags, selector.to_bson, update.to_bson, write_concern, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
@@ -170,7 +170,7 @@ class Mongo::Collection
   # selector. The `BSON` selector is not validated, simply passed along as
   # appropriate to the server. As such, compatibility and errors should be
   # validated in the appropriate server documentation.
-  def remove(selector, flags = LibMongoC::RemoveFlags::REMOVE_NONE, write_concern = nil)
+  def remove(selector, flags = LibMongoC::RemoveFlags::NONE, write_concern = nil)
     unless LibMongoC.collection_remove(self, flags, selector.to_bson, write_concern, out error)
       raise BSON::BSONError.new(pointerof(error))
     end

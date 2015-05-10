@@ -29,7 +29,7 @@ class Mongo::Client
 
   # This method executes a command on the server using the database and command
   # specification provided.
-  def command(db_name, query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def command(db_name, query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.client_command(self, db_name, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
                                         query, fields, prefs)
@@ -37,7 +37,7 @@ class Mongo::Client
 
   # This method executes a command on the server using the database and command
   # specification provided.  Result is passed to the provided block.
-  def command(db_name, query, fields = BSON.new, flags = LibMongoC::QueryFlags::QUERY_NONE,
+  def command(db_name, query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     command(db_name, query, fields, flags, skip, limit, batch_size, prefs).each do |doc|
       yield doc
