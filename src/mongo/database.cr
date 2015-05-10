@@ -104,7 +104,7 @@ class Mongo::Database
     ReadPrefs.new LibMongoC.database_get_read_prefs(self)
   end
 
-  # This mthod sets the default read preferences to use on operations performed
+  # This method sets the default read preferences to use on operations performed
   # with database. Collections created with `collection(name)` after this call
   # will inherit these read preferences.
   def read_prefs=(value)
