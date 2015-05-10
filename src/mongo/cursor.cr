@@ -24,17 +24,25 @@ class Mongo::Cursor
     raise "cursor is closed" if @closed
   end
 
+  # This method shall create a copy of a `Cursor`. The cloned cursor will be
+  # reset to the beginning of the query, and therefore the query will be
+  # re-executed on the MongoDB server when `next` is called.
   def clone
     check_closed
     handle = LibMongoC.cursor_clone(self)
     Cursor.new handle
   end
 
+  # This method shall indicate if there is more data to be read from the
+  # cursor.
   def more
     check_closed
     LibMongoC.cursor_more(self)
   end
 
+  # This method shall iterate the underlying cursor, setting `BSON` to the
+  # next document.
+  # It returns `nil` if the cursor was exhausted.
   def next
     check_closed
     if LibMongoC.cursor_next(self, @data)
@@ -43,6 +51,8 @@ class Mongo::Cursor
     end
   end
 
+  # This method iterates the underlying cursor passing the resulted documents
+  # to the specified block.
   def each
     check_closed
     while v = self.next
@@ -56,22 +66,28 @@ class Mongo::Cursor
     end
   end
 
+  # Fetches the MongoDB host that the cursor is communicating with in the host
+  # out parameter.
   def host
     check_closed
     LibMongoC.cursor_get_host(self, out hosts)
     Host.hosts(pointerof(hosts)).first
   end
 
+  # Checks to see if a cursor is in a state that allows for more documents to
+  # be queried. This is primarily useful with tailable cursors.
   def alive?
     return false if @closed
     LibMongoC.cursor_is_alive(self)
   end
 
+  # Fetches the cursors current document.
   def current
     check_closed
     @current
   end
 
+  # 
   def batch_size
     check_closed
     LibMongoC.cursor_get_batch_size(self)
