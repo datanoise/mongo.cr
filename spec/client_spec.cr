@@ -1,4 +1,4 @@
-require "../mongo"
+require "../src/mongo"
 require "spec"
 
 describe Mongo::Client do

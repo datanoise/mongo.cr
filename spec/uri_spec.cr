@@ -1,4 +1,4 @@
-require "../mongo/uri"
+require "../src/mongo/uri"
 require "spec"
 
 describe Mongo::Uri do

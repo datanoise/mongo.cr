@@ -1,4 +1,4 @@
-require "../mongo"
+require "../src/mongo"
 require "spec"
 
 def create_collection
