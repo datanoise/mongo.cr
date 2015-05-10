@@ -1,4 +1,3 @@
-require "../bson/bson"
 require "./index_opt"
 require "./read_prefs"
 

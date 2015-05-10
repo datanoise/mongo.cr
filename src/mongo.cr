@@ -1,5 +1,5 @@
 require "logger"
-require "./bson/*"
+require "./bson"
 require "./mongo/*"
 
 module Mongo

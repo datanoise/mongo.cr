@@ -1,4 +1,3 @@
-require "../bson/bson"
 require "./lib_mongo"
 require "./host"
 
