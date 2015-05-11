@@ -3,6 +3,9 @@ require "./host"
 
 class Mongo::Cursor
   def initialize(@handle: LibMongoC::Cursor)
+    unless @handle
+      raise "Unable to initialize Cursor"
+    end
     @data = Pointer(LibBSON::BSON).malloc(1)
     @closed = false
   end
@@ -15,8 +18,8 @@ class Mongo::Cursor
 
   def close
     return if @closed
-    @closed = true
     LibMongoC.cursor_destroy(self)
+    @closed = true
   end
 
   private def check_closed
@@ -27,7 +30,6 @@ class Mongo::Cursor
   # reset to the beginning of the query, and therefore the query will be
   # re-executed on the MongoDB server when `next` is called.
   def clone
-    check_closed
     handle = LibMongoC.cursor_clone(self)
     Cursor.new handle
   end
@@ -35,7 +37,6 @@ class Mongo::Cursor
   # This method shall indicate if there is more data to be read from the
   # cursor.
   def more
-    check_closed
     LibMongoC.cursor_more(self)
   end
 
@@ -43,7 +44,6 @@ class Mongo::Cursor
   # next document.
   # It returns `nil` if the cursor was exhausted.
   def next
-    check_closed
     if LibMongoC.cursor_next(self, @data)
       check_error
       @current = BSON.copy_from @data.value
@@ -53,7 +53,6 @@ class Mongo::Cursor
   # This method iterates the underlying cursor passing the resulted documents
   # to the specified block.
   def each
-    check_closed
     while v = self.next
       yield v
     end
@@ -68,7 +67,6 @@ class Mongo::Cursor
   # Fetches the MongoDB host that the cursor is communicating with in the host
   # out parameter.
   def host
-    check_closed
     LibMongoC.cursor_get_host(self, out hosts)
     Host.hosts(pointerof(hosts)).first
   end
@@ -86,24 +84,19 @@ class Mongo::Cursor
     @current
   end
 
-  # 
   def batch_size
-    check_closed
     LibMongoC.cursor_get_batch_size(self)
   end
 
   def batch_size=(size)
-    check_closed
     LibMongoC.cursor_set_batch_size(self, size.to_u32)
   end
 
   def hint
-    check_closed
     LibMongoC.cursor_get_hint(self)
   end
 
   def id
-    check_closed
     LibMongoC.cursor_get_id(self)
   end
 

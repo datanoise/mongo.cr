@@ -152,7 +152,6 @@ lib LibMongoC
 
   type BulkOperation = Void*
 
-  fun bulk_operation_new = mongoc_bulk_operation_new(ordered: Bool) : BulkOperation
   fun bulk_operation_destroy = mongoc_bulk_operation_destroy(bulk: BulkOperation)
   fun bulk_operation_execute = mongoc_bulk_operation_execute(bulk: BulkOperation, reply: BSON,
                                                              error: BSONError*) : UInt32
@@ -165,12 +164,6 @@ lib LibMongoC
                                                            document: BSON, upsert: Bool)
   fun bulk_operation_update_one = mongoc_bulk_operation_update_one(bulk: BulkOperation, selector: BSON,
                                                                    document: BSON, upsert: Bool)
-  fun bulk_operation_set_write_concern = mongoc_bulk_operation_set_write_concern(bulk: BulkOperation,
-                                                                                 write_concern: WriteConcern)
-  fun bulk_operation_set_database = mongoc_bulk_operation_set_database(bulk: BulkOperation, database: UInt8*)
-  fun bulk_operation_set_collection = mongoc_bulk_operation_set_collection(bulk: BulkOperation, collection: UInt8*)
-  fun bulk_operation_set_client = mongoc_bulk_operation_set_client(bulk: BulkOperation, client: Void*)
-  fun bulk_operation_set_hint = mongoc_bulk_operation_set_hint(bulk: BulkOperation, hint: UInt32)
 
   type Collection = Void*
 

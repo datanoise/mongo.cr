@@ -41,7 +41,6 @@ end
 
 # ToDo
 
-- Bulk operations
 - GridFS
 
 # License

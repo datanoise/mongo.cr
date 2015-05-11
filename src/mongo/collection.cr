@@ -5,6 +5,9 @@ class Mongo::Collection
   getter database
 
   def initialize(@database, @handle: LibMongoC::Collection)
+    unless @handle
+      raise "Unable to initialize Collection"
+    end
   end
 
   def finalize
@@ -127,6 +130,15 @@ class Mongo::Collection
            skip = 0, limit = 0, batch_size = 0, prefs = nil)
     find(query, fields, flags, skip, limit, batch_size, prefs).each do |doc|
       yield doc
+    end
+  end
+
+  # The same as `find` but returns a first document from the cursor.
+  def find_one(query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
+               skip = 0, prefs = nil)
+    cursor = find(query, fields, flags, skip: skip, prefs: prefs)
+    cursor.next.tap do
+      cursor.close
     end
   end
 
@@ -261,6 +273,18 @@ class Mongo::Collection
       raise BSON::BSONError.new(pointerof(error))
     end
     BSON.copy_from pointerof(reply)
+  end
+
+  # This method shall begin a new bulk operation. Use returned `BulkOperation`
+  # object to schedule different database operations and execute them all at
+  # once.
+  #
+  # @param ordered: if is `true`, then the bulk operation will attempt to
+  # continue processing even after the first failure.  @param write_concern:
+  # should contain the write concern you wish to have applied to all operations
+  # within the bulk operation.
+  def create_bulk_operation(ordered = false, write_concern = nil)
+    BulkOperation.new LibMongoC.collection_create_bulk_operation(self, ordered, write_concern)
   end
 
   def to_unsafe
