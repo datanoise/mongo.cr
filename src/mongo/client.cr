@@ -1,4 +1,5 @@
 require "./uri"
+require "./stream"
 
 # Client class provides access to a MongoDB node, replica-set, or
 # sharded-cluster. It maintains management of underlying sockets and routing to
@@ -6,12 +7,10 @@ require "./uri"
 #
 class Mongo::Client
   def initialize(@handle = LibMongoC::Client)
-    unless @handle
-      raise "Unable to initialize Client"
-    end
+    raise "invalid handle" unless @handle
   end
 
-  # Creates a new Client using uri exressed as a String or Uri class instance.
+  # Creates a new Client using uri expressed as a String or Uri class instance.
   def initialize(uri: String | Uri)
     handle =
       if uri.is_a?(String)
@@ -20,6 +19,12 @@ class Mongo::Client
         LibMongoC.client_new_from_uri(uri)
       end
     initialize handle
+  end
+
+  # Use this method to set up the crystal implementation of underlying stream API.
+  # This is useful to make mongo client's IO operations to play nicely with Fiber API.
+  def setup_stream
+    LibMongoC.client_set_stream_initiator(self, -> Stream.initiator, nil)
   end
 
   # Returns a Uri instance used to create Client.

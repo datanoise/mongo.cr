@@ -5,9 +5,7 @@ class Mongo::Collection
   getter database
 
   def initialize(@database, @handle: LibMongoC::Collection)
-    unless @handle
-      raise "Unable to initialize Collection"
-    end
+    raise "invalid handle" unless @handle
   end
 
   def finalize

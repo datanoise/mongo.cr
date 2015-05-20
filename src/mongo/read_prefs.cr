@@ -1,6 +1,6 @@
 class Mongo::ReadPrefs
   def initialize(@handle: LibMongoC::ReadPrefs)
-    raise "unable to initialize ReadPrefs" if @handle.nil?
+    raise "invalid handle" unless @handle
   end
 
   def initialize(mode = LibMongoC::ReadMode::PRIMARY : LibMongoC::ReadMode)

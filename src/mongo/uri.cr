@@ -4,7 +4,7 @@ require "./write_concern"
 
 class Mongo::Uri
   def initialize(@handle: LibMongoC::Uri)
-    raise "unable to parse Uri" unless @handle
+    raise "invalid handle" unless @handle
     @hosts = [] of Host
   end
 

@@ -9,6 +9,7 @@ class BSON
 
   def initialize(@handle: LibBSON::BSON)
     @valid = true
+    raise "invalid handle" unless @handle
   end
 
   def initialize
@@ -16,7 +17,7 @@ class BSON
   end
 
   def finalize
-    LibBSON.bson_destroy(@handle) unless @valid
+    LibBSON.bson_destroy(@handle) if @valid
   end
 
   def self.from_json(json)

@@ -4,11 +4,8 @@ require "./lib_mongo"
 # as a single batch.
 class Mongo::BulkOperation
   def initialize(@handle: LibMongoC::BulkOperation)
-    unless @handle
-      raise "Unable to initialize BulkOperation"
-    end
+    raise "invalid handle" unless @handle
     @executed = false
-    raise "" unless @handle
   end
 
   def finalize

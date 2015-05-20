@@ -2,9 +2,7 @@ class Mongo::Database
   getter client
 
   def initialize(@client, @handle = LibMongoC::Database)
-    unless @handle
-      raise "Unable to initialize Database"
-    end
+    raise "invalid handle" unless @handle
   end
 
   def finalize

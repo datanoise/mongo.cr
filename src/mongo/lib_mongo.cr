@@ -252,9 +252,36 @@ lib LibMongoC
   fun database_get_collection_names = mongoc_database_get_collection_names(db: Database, error: BSONError*): UInt8**
   fun database_get_collection = mongoc_database_get_collection(db: Database, name: UInt8*): Collection
 
+  ifdef windows
+    struct IOVec
+      ion_len: UInt64
+      iov_base: UInt8*
+    end
+  else
+    struct IOVec
+      ion_base: UInt8*
+      ion_len: LibC::SizeT
+    end
+  end
+
+  struct Stream
+    type: Int32
+    destroy: (Stream*) ->
+    close: (Stream*) -> Int32
+    flush: (Stream*) -> Int32
+    writev: (Stream*, IOVec*, LibC::SizeT, Int32) -> LibC::SSizeT
+    readv: (Stream*, IOVec*, LibC::SizeT, LibC::SizeT, Int32) -> LibC::SSizeT
+    setsockopt: (Stream*, Int32, Int32, Void*, Int32) -> Int32
+    get_base_stream: (Stream*) -> Stream*
+    check_closed: (Stream*) -> Bool
+    padding: Void*[7]
+  end
+
+  alias StreamInitiator = (Uri, HostList, Void*, LibBSON::BSONError*) -> Stream*
   type Client = Void*
 
   fun client_new = mongoc_client_new(uri_string: UInt8*) : Client
+  fun client_set_stream_initiator = mongoc_client_set_stream_initiator(client: Client, initiator: StreamInitiator, user_data: Void*)
   fun client_new_from_uri = mongoc_client_new_from_uri(uri: Uri) : Client
   fun client_get_uri = mongoc_client_get_uri(client: Client) : Uri
   fun client_command = mongoc_client_command(client: Client, db_name: UInt8*, flags: QueryFlags,
