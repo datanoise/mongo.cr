@@ -39,10 +39,6 @@ collection.find({"age" => {"$gt" => 30}}) do |doc|
 end
 ```
 
-# ToDo
-
-- GridFS
-
 # License
 
 MIT clause - see LICENSE for more details.
