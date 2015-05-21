@@ -9,6 +9,7 @@ class Mongo::GridFS::FS
     LibMongoC.gridfs_destroy(self)
   end
 
+  # This function shall create a new file.
   def create_file(filename, content_type = nil, md5 = nil, aliases = BSON.new, metadata = BSON.new, chunk_size = 0)
     opt = LibMongoC::GFSFileOpt.new
     opt.md5 = md5.cstr if md5
@@ -21,16 +22,22 @@ class Mongo::GridFS::FS
     File.new LibMongoC.gridfs_create_file(self, pointerof(opt))
   end
 
+  # Requests that an entire GridFS be dropped, including all files associated
+  # with it.
   def drop
     unless LibMongoC.gridfs_drop(self, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
   end
 
+  # Finds all gridfs files matching query. You can iterate the matched gridfs
+  # files with the resulting file list.
   def find(query = BSON.new)
     FileList.new LibMongoC.gridfs_find(self, query.to_bson)
   end
 
+  # This function shall execute a query on the underlying gridfs
+  # implementation. The first file matching query will be returned.
   def find_one(query = BSON.new)
     handle = LibMongoC.gridfs_find_one(self, query.to_bson, out error)
     # unless handle
@@ -39,6 +46,8 @@ class Mongo::GridFS::FS
     File.new handle if handle
   end
 
+  # Finds the first file matching the filename specified. If no file could be
+  # found, nil is returned.
   def find_by_name(filename)
     handle = LibMongoC.gridfs_find_one_by_filename(self, filename, out error)
     # unless handle
@@ -47,14 +56,18 @@ class Mongo::GridFS::FS
     File.new handle if handle
   end
 
+  # Returns a Collection that contains the chunks for files.
   def chunks
     Collection.new @database, LibMongoC.gridfs_get_chunks(self), false
   end
 
+  # Retrieves the Collection containing the file metadata for GridFS.
   def files
     Collection.new @database, LibMongoC.gridfs_get_files(self), false
   end
 
+  # Removes all files matching filename and their data chunks from the MongoDB
+  # server.
   def remove(filename)
     unless LibMongoC.gridfs_remove_by_filename(self, filename, out error)
       raise BSON::BSONError.new(pointerof(error))
