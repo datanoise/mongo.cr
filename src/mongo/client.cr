@@ -121,6 +121,21 @@ class Mongo::Client
     BSON.copy_from pointerof(reply)
   end
 
+  # Create GridFS instance.
+  #
+  # @param db: the name of the database which the gridfs instance should exist in.
+  #
+  # @param prefix:  corresponds to the gridfs collection namespacing; its
+  # default is "fs", thus the default GridFS collection names are "fs.files"
+  # and "fs.chunks".
+  def gridfs(db, prefix = "fs")
+    handle = LibMongoC.client_get_gridfs(self, db, prefix, out error)
+    unless handle
+      raise BSON::BSONError.new(pointerof(error))
+    end
+    GridFS::FS.new database(db), handle
+  end
+
   # This method returns the maximum message size allowed by the cluster. Until
   # a connection has been made, this will be the default of 40Mb.
   def max_message_size

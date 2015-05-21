@@ -4,12 +4,12 @@ require "./read_prefs"
 class Mongo::Collection
   getter database
 
-  def initialize(@database, @handle: LibMongoC::Collection)
+  def initialize(@database, @handle: LibMongoC::Collection, @owned = true)
     raise "invalid handle" unless @handle
   end
 
   def finalize
-    LibMongoC.collection_destroy(self)
+    LibMongoC.collection_destroy(self) if @owned
   end
 
   # This method shall execute an aggregation query on the underlying 'Collection'

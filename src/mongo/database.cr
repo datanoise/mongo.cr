@@ -97,6 +97,10 @@ class Mongo::Database
    Collection.new self, col
   end
 
+  def gridfs(prefix = "fs")
+    @client.gridfs(name, prefix)
+  end
+
   # Fetches the default read preferences to use with database.
   def read_prefs
     ReadPrefs.new LibMongoC.database_get_read_prefs(self)

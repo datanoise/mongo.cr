@@ -1,15 +1,30 @@
+def create_client
+  Mongo::Client.new("mongodb://localhost")
+end
+
+def create_database
+  client = create_client
+  client["my_db_#{Time.now.to_i}"]
+end
+
 def create_collection
-  client = Mongo::Client.new("mongodb://localhost")
-  db = client["my_db_#{Time.now.to_i}"]
+  db = create_database
   db["my_col"]
 end
 
-def with_collection
-  col = create_collection
+def with_database
+  db = create_database
   begin
-    yield col
+    yield db
   ensure
-    col.database.drop
+    db.drop
+  end
+end
+
+def with_collection
+  with_database do |db|
+    col = db["my_col"]
+    yield col
   end
 end
 

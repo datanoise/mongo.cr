@@ -277,7 +277,62 @@ lib LibMongoC
     padding: Void*[7]
   end
 
-  alias StreamInitiator = (Uri, HostList, Void*, LibBSON::BSONError*) -> Stream*
+  alias StreamInitiator = (Uri, HostList, Void*, BSONError*) -> Stream*
+
+  alias GFSFile = Void*
+
+  struct GFSFileOpt
+    md5: UInt8*
+    filename: UInt8*
+    content_type: UInt8*
+    aliases: BSON
+    metadata: BSON
+    chunk_size: UInt32
+  end
+
+  fun gridfs_file_destroy = mongoc_gridfs_file_destroy(file: GFSFile)
+  fun gridfs_file_error = mongoc_gridfs_file_error(file: GFSFile, error: BSONError*) : Bool
+  fun gridfs_file_get_aliases = mongoc_gridfs_file_get_aliases(file: GFSFile) : BSON
+  fun gridfs_file_get_chunk_size = mongoc_gridfs_file_get_chunk_size(file: GFSFile) : Int32
+  fun gridfs_file_get_content_type = mongoc_gridfs_file_get_content_type(file: GFSFile) : UInt8*
+  fun gridfs_file_get_filename = mongoc_gridfs_file_get_filename(file: GFSFile) : UInt8*
+  fun gridfs_file_get_length = mongoc_gridfs_file_get_length(file: GFSFile) : UInt64
+  fun gridfs_file_get_md5 = mongoc_gridfs_file_get_md5(file: GFSFile) : UInt8*
+  fun gridfs_file_get_metadata = mongoc_gridfs_file_get_metadata(file: GFSFile) : BSON
+  fun gridfs_file_get_upload_date = mongoc_gridfs_file_get_upload_date(file: GFSFile) : Int64
+  fun gridfs_file_readv = mongoc_gridfs_file_readv(file: GFSFile, iov: IOVec*, iovcnt: LibC::SizeT,
+                                                   min_bytes: LibC::SizeT, timeout_msec: UInt32) : LibC::SSizeT
+  fun gridfs_file_remove = mongoc_gridfs_file_remove(file: GFSFile, error: BSONError*) : Bool
+  fun gridfs_file_save = mongoc_gridfs_file_save(file: GFSFile) : Bool
+  fun gridfs_file_seek = mongoc_gridfs_file_seek(file: GFSFile, delta: Int64, whence: Int32) : Int32
+  fun gridfs_file_set_aliases = mongoc_gridfs_file_set_aliases(file: GFSFile, bson: BSON)
+  fun gridfs_file_set_content_type = mongoc_gridfs_file_set_content_type(file: GFSFile, content_type: UInt8*)
+  fun gridfs_file_set_filename = mongoc_gridfs_file_set_filename(file: GFSFile, filename: UInt8*)
+  fun gridfs_file_set_md5 = mongoc_gridfs_file_set_md5(file: GFSFile, md5: UInt8*)
+  fun gridfs_file_set_metadata = mongoc_gridfs_file_set_metadata(file: GFSFile, metadata: BSON)
+  fun gridfs_file_tell = mongoc_gridfs_file_tell(file: GFSFile) : UInt64
+  fun gridfs_file_writev = mongoc_gridfs_file_writev(file: GFSFile, iov: IOVec*, iovcnt: LibC::SizeT,
+                                                     timeout_msec: UInt32) : LibC::SSizeT
+
+  alias GFSFileList = Void*
+
+  fun gridfs_file_list_destroy = mongoc_gridfs_file_list_destroy(list: GFSFileList)
+  fun gridfs_file_list_error = mongoc_gridfs_file_list_error(list: GFSFileList, error: BSONError*) : Bool
+  fun gridfs_file_list_next = mongoc_gridfs_file_list_next(list: GFSFileList) : GFSFile
+
+  alias GridFS = Void*
+
+  fun gridfs_create_file = mongoc_gridfs_create_file(fs: GridFS, opt: GFSFileOpt*) : GFSFile
+  fun gridfs_create_file_from_stream = mongoc_gridfs_create_file_from_stream(fs: GridFS, stream: Stream*, opt: GFSFileOpt*) : GFSFile
+  fun gridfs_destroy = mongoc_gridfs_destroy(fs: GridFS)
+  fun gridfs_drop = mongoc_gridfs_drop(fs: GridFS, error: BSONError*) : Bool
+  fun gridfs_find = mongoc_gridfs_find(fs: GridFS, query: BSON) : GFSFileList
+  fun gridfs_find_one = mongoc_gridfs_find_one(fs: GridFS, query: BSON, error: BSONError*) : GFSFile
+  fun gridfs_find_one_by_filename = mongoc_gridfs_find_one_by_filename(fs: GridFS, filename: UInt8*, error: BSONError*) : GFSFile
+  fun gridfs_get_chunks = mongoc_gridfs_get_chunks(fs: GridFS) : Collection
+  fun gridfs_get_files = mongoc_gridfs_get_files(fs: GridFS) : Collection
+  fun gridfs_remove_by_filename = mongoc_gridfs_remove_by_filename(fs: GridFS, filename: UInt8*, error: BSONError*) : Bool
+
   type Client = Void*
 
   fun client_new = mongoc_client_new(uri_string: UInt8*) : Client
@@ -304,4 +359,5 @@ lib LibMongoC
   fun client_get_read_prefs = mongoc_client_get_read_prefs(client: Client) : ReadPrefs
   fun client_set_read_prefs = mongoc_client_set_read_prefs(client: Client, prefs: ReadPrefs)
   # fun client_set_ssl_opts = mongoc_client_set_ssl_opts(client: Client, opts: SSLOpt)
+  fun client_get_gridfs = mongoc_client_get_gridfs(client: Client, db: UInt8*, prefix: UInt8*, error: BSONError*) : GridFS
 end

@@ -1,6 +1,7 @@
 require "logger"
 require "./bson"
 require "./mongo/*"
+require "./mongo/gridfs/*"
 
 module Mongo
   @@logger = Logger.new(STDIN)
