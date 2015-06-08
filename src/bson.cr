@@ -1,5 +1,4 @@
 require "./bson/lib_bson"
-require "./shims/time"
 require "./bson/core_ext/*"
 require "./bson/*"
 
