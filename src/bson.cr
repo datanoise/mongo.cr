@@ -104,7 +104,7 @@ class BSON
   end
 
   def value(key)
-    value(key) { raise IndexOutOfBounds.new }
+    value(key) { raise IndexError.new }
   end
 
   def fetch(key: String)
@@ -121,7 +121,7 @@ class BSON
   end
 
   def [](key: String)
-    fetch(key) { raise IndexOutOfBounds.new }
+    fetch(key) { raise IndexError.new }
   end
 
   def []=(key, value: Int32)
