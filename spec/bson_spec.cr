@@ -188,7 +188,7 @@ describe BSON do
     bson["time"] = t
     bson_t = bson["time"]
     if bson_t.is_a?(Time)
-      bson_t.to_i.should eq(t.to_utc.to_i)
+      bson_t.epoch.should eq(t.to_utc.epoch)
     else
       fail "expected Time"
     end
