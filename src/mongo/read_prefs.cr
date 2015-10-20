@@ -1,5 +1,5 @@
 class Mongo::ReadPrefs
-  def initialize(@handle: LibMongoC::ReadPrefs)
+  def initialize(@handle : LibMongoC::ReadPrefs)
     raise "invalid handle" unless @handle
   end
 
@@ -19,7 +19,7 @@ class Mongo::ReadPrefs
     LibMongoC.read_prefs_get_mode(self)
   end
 
-  def mode=(mode: LibMongoC::ReadMode)
+  def mode=(mode : LibMongoC::ReadMode)
     LibMongoC.read_prefs_set_mode(self, mode)
   end
 

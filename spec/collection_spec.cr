@@ -63,7 +63,7 @@ describe Mongo::Collection do
 
       col.drop_index("my_index")
 
-      col.find_indexes.to_a.count.should eq(1)
+      col.find_indexes.to_a.size.should eq(1)
     end
   end
 

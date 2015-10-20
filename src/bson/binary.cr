@@ -11,7 +11,7 @@ class BSON
     property! subtype
     property! data
 
-    def initialize(@subtype: SubType, @data: Slice(UInt8))
+    def initialize(@subtype : SubType, @data : Slice(UInt8))
     end
 
     def to_raw_type

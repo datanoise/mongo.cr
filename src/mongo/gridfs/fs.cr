@@ -1,7 +1,7 @@
 class Mongo::GridFS::FS
   getter database
 
-  def initialize(@database, @handle: LibMongoC::GridFS)
+  def initialize(@database, @handle : LibMongoC::GridFS)
     raise "invalid handle" unless @handle
   end
 

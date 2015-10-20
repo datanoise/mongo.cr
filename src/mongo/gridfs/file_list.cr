@@ -1,7 +1,7 @@
 class Mongo::GridFS::FileList
   include Enumerable(File)
 
-  def initialize(@handle: LibMongoC::GFSFileList)
+  def initialize(@handle : LibMongoC::GFSFileList)
     raise "invalid handle" unless @handle
   end
 

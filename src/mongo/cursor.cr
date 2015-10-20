@@ -2,7 +2,7 @@ require "./lib_mongo"
 require "./host"
 
 class Mongo::Cursor
-  def initialize(@handle: LibMongoC::Cursor)
+  def initialize(@handle : LibMongoC::Cursor)
     unless @handle
       raise "Unable to initialize Cursor"
     end

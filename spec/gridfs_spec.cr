@@ -33,7 +33,7 @@ describe Mongo::GridFS do
       # we have to look up the file again because mongo-c seek function is buggy
       file = fs.find_by_name(file.name)
       fail "cannot find a file" unless file
-      data = file.read
+      data = file.gets_to_end
       data.should eq("once upon a time")
     end
   end
@@ -46,7 +46,7 @@ describe Mongo::GridFS do
       file.save.should be_true
 
       file.remove.should be_true
-      fs.find.count.should eq(0)
+      fs.find.size.should eq(0)
     end
   end
 

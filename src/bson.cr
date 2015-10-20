@@ -6,7 +6,7 @@ class BSON
   include Enumerable(Value)
   include Comparable(BSON)
 
-  def initialize(@handle: LibBSON::BSON)
+  def initialize(@handle : LibBSON::BSON)
     @valid = true
     raise "invalid handle" unless @handle
   end
@@ -27,12 +27,12 @@ class BSON
     new(handle)
   end
 
-  def self.from_data(data: Slice(UInt8))
-    handle = LibBSON.bson_new_from_data(data, data.length)
+  def self.from_data(data : Slice(UInt8))
+    handle = LibBSON.bson_new_from_data(data, data.size)
     new(handle)
   end
 
-  def self.copy_from(data: LibBSON::BSON)
+  def self.copy_from(data : LibBSON::BSON)
     handle = LibBSON.bson_copy(data)
     new(handle)
   end
@@ -65,7 +65,7 @@ class BSON
     LibBSON.bson_has_field(handle, key)
   end
 
-  def ==(other: BSON)
+  def ==(other : BSON)
     LibBSON.bson_equal(self, other)
   end
 
@@ -73,7 +73,7 @@ class BSON
     false
   end
 
-  def <=>(other: BSON)
+  def <=>(other : BSON)
     LibBSON.bson_compare(self, other)
   end
 
@@ -81,7 +81,7 @@ class BSON
     LibBSON.bson_reinit(self)
   end
 
-  def concat(src: BSON)
+  def concat(src : BSON)
     LibBSON.bson_concat(self, src)
     self
   end
@@ -107,7 +107,7 @@ class BSON
     value(key) { raise IndexError.new }
   end
 
-  def fetch(key: String)
+  def fetch(key : String)
     if LibBSON.bson_iter_init_find(out iter, handle, key)
       value = LibBSON.bson_iter_value(pointerof(iter))
       Value.new(value).value
@@ -116,68 +116,68 @@ class BSON
     end
   end
 
-  def []?(key: String)
+  def []?(key : String)
     fetch(key) { nil }
   end
 
-  def [](key: String)
+  def [](key : String)
     fetch(key) { raise IndexError.new }
   end
 
-  def []=(key, value: Int32)
+  def []=(key, value : Int32)
     LibBSON.bson_append_int32(handle, key, key.bytesize, value)
   end
 
-  def []=(key, value: Int64)
+  def []=(key, value : Int64)
     LibBSON.bson_append_int64(handle, key, key.bytesize, value)
   end
 
-  def []=(key, value: Binary)
+  def []=(key, value : Binary)
     LibBSON.bson_append_binary(handle, key, key.bytesize,
-                               value.to_raw_type, value.data, value.data.length)
+                               value.to_raw_type, value.data, value.data.size)
   end
 
-  def []=(key, value: Bool)
+  def []=(key, value : Bool)
     LibBSON.bson_append_bool(handle, key, key.bytesize, value)
   end
 
-  def []=(key, value: Float64|Float32)
+  def []=(key, value : Float64|Float32)
     LibBSON.bson_append_double(handle, key, key.bytesize, value.to_f64)
   end
 
-  def []=(key, value: MinKey)
+  def []=(key, value : MinKey)
     LibBSON.bson_append_minkey(handle, key, key.bytesize)
   end
 
-  def []=(key, value: MaxKey)
+  def []=(key, value : MaxKey)
     LibBSON.bson_append_maxkey(handle, key, key.bytesize)
   end
 
-  def []=(key, value: Nil)
+  def []=(key, value : Nil)
     LibBSON.bson_append_null(handle, key, key.bytesize)
   end
 
-  def []=(key, value: ObjectId)
+  def []=(key, value : ObjectId)
     LibBSON.bson_append_oid(handle, key, key.bytesize, value)
   end
 
-  def []=(key, value: String)
+  def []=(key, value : String)
     LibBSON.bson_append_utf8(handle, key, key.bytesize, value, value.bytesize)
   end
 
-  def []=(key, value: Symbol)
+  def []=(key, value : Symbol)
     LibBSON.bson_append_symbol(handle, key, key.bytesize, value, value.bytesize)
   end
 
-  def []=(key, value: Time)
+  def []=(key, value : Time)
     LibBSON.bson_append_date_time(handle, key, key.bytesize, value.to_utc.epoch * 1000)
   end
 
-  def []=(key, value: Timestamp)
+  def []=(key, value : Timestamp)
     LibBSON.bson_append_timestamp(handle, key, key.bytesize, value.timestamp, value.increment)
   end
 
-  def []=(key, value: Code)
+  def []=(key, value : Code)
     if value.scope.empty?
       LibBSON.bson_append_code(handle, key, key.bytesize, value.code)
     else
@@ -185,11 +185,11 @@ class BSON
     end
   end
 
-  def []=(key, value: BSON)
+  def []=(key, value : BSON)
     LibBSON.bson_append_document(handle, key, key.bytesize, value)
   end
 
-  def []=(key, value: Regex)
+  def []=(key, value : Regex)
     modifiers = value.options
     options =
       if modifiers

@@ -4,7 +4,7 @@ require "spec"
 describe Mongo::Uri do
   it "should be able to create new uri" do
     uri = Mongo::Uri.new "mongodb://localhost:27017"
-    uri.hosts.length.should eq(1)
+    uri.hosts.size.should eq(1)
     host = uri.hosts.first
     host.host.should eq("localhost")
     host.port.should eq(27017)
@@ -12,7 +12,7 @@ describe Mongo::Uri do
 
   it "should be able to create new uri with host and port" do
     uri = Mongo::Uri.new "localhost", 27017
-    uri.hosts.length.should eq(1)
+    uri.hosts.size.should eq(1)
     host = uri.hosts.first
     host.host.should eq("localhost")
     host.port.should eq(27017)
@@ -57,6 +57,6 @@ describe Mongo::Uri do
   it "should be able to parse replica set" do
     uri = Mongo::Uri.new "mongodb://db1.example.net,db2.example.net:2500/?replicaSet=test&connectTimeoutMS=300000"
     uri.replica_set.should eq("test")
-    uri.hosts.length.should eq(2)
+    uri.hosts.size.should eq(2)
   end
 end

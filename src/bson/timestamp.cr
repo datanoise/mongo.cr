@@ -2,7 +2,7 @@ class BSON
   struct Timestamp
     include Comparable(Timestamp)
 
-    def initialize(@handle: LibBSON::Timestamp)
+    def initialize(@handle : LibBSON::Timestamp)
     end
 
     def initialize(timestamp, increment)
@@ -20,7 +20,7 @@ class BSON
       @handle.incr
     end
 
-    def ==(other: Timestamp)
+    def ==(other : Timestamp)
       timestamp == other.timestamp && increment == other.increment
     end
 
@@ -28,7 +28,7 @@ class BSON
       false
     end
 
-    def <=>(other: Timestamp)
+    def <=>(other : Timestamp)
       cmp = timestamp <=> other.timestamp
       if cmp == 0
         cmp = increment <=> other.increment

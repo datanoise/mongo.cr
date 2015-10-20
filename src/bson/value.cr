@@ -2,7 +2,7 @@ class BSON
   struct Value
     getter handle
 
-    def initialize(src: LibBSON::BSONValue)
+    def initialize(src : LibBSON::BSONValue)
       LibBSON.bson_value_copy(src, out dst)
       @handle = dst
     end

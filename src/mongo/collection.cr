@@ -4,7 +4,7 @@ require "./read_prefs"
 class Mongo::Collection
   getter database
 
-  def initialize(@database, @handle: LibMongoC::Collection, @owned = true)
+  def initialize(@database, @handle : LibMongoC::Collection, @owned = true)
     raise "invalid handle" unless @handle
   end
 
@@ -57,12 +57,12 @@ class Mongo::Collection
     ret =
       if opts
         LibMongoC.collection_count_with_opts(self, flags, query.to_bson, skip.to_i64,
-                                             limit.to_i64, opts.to_bson, prefs, out error)
+                                             limit.to_i64, opts.to_bson, prefs, out error1)
       else
-        LibMongoC.collection_count(self, flags, query.to_bson, skip.to_i64, limit.to_i64, prefs, out error)
+        LibMongoC.collection_count(self, flags, query.to_bson, skip.to_i64, limit.to_i64, prefs, out error2)
       end
     if ret == -1
-      raise BSON::BSONError.new(pointerof(error))
+      raise BSON::BSONError.new(opts ? pointerof(error1) : pointerof(error2))
     end
     ret
   end
@@ -152,8 +152,8 @@ class Mongo::Collection
   def insert_bulk(documents, flags = LibMongoC::InsertFlags::NONE, write_concern = nil)
     return if documents.empty?
 
-    docs = Pointer(LibBSON::BSON).malloc(documents.length) {|idx| documents[idx].to_bson.to_unsafe}
-    unless LibMongoC.collection_insert_bulk(self, flags, docs, documents.length.to_u32, write_concern, out error)
+    docs = Pointer(LibBSON::BSON).malloc(documents.size) {|idx| documents[idx].to_bson.to_unsafe}
+    unless LibMongoC.collection_insert_bulk(self, flags, docs, documents.size.to_u32, write_concern, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
   end

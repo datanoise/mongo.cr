@@ -6,7 +6,7 @@ class Mongo::Host
   def initialize(@host, @port, @family)
   end
 
-  def self.hosts(handle: LibMongoC::HostList)
+  def self.hosts(handle : LibMongoC::HostList)
     hosts = [] of Host
     cur = handle
     loop do

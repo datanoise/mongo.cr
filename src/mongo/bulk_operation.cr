@@ -3,7 +3,7 @@ require "./lib_mongo"
 # This class provides an abstraction for submitting multiple write operations
 # as a single batch.
 class Mongo::BulkOperation
-  def initialize(@handle: LibMongoC::BulkOperation)
+  def initialize(@handle : LibMongoC::BulkOperation)
     raise "invalid handle" unless @handle
     @executed = false
   end

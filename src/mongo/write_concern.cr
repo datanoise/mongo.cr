@@ -1,5 +1,5 @@
 class Mongo::WriteConcern
-  def initialize(@handle: LibMongoC::WriteConcern)
+  def initialize(@handle : LibMongoC::WriteConcern)
     raise "invalid handle" unless @handle
   end
 

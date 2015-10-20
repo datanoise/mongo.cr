@@ -3,7 +3,7 @@ require "./host"
 require "./write_concern"
 
 class Mongo::Uri
-  def initialize(@handle: LibMongoC::Uri)
+  def initialize(@handle : LibMongoC::Uri)
     raise "invalid handle" unless @handle
     @hosts = [] of Host
   end

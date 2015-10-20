@@ -2,10 +2,10 @@ class BSON
   struct ObjectId
     include Comparable(ObjectId)
 
-    def initialize(@handle: LibBSON::Oid*)
+    def initialize(@handle : LibBSON::Oid*)
     end
 
-    def initialize(str: String)
+    def initialize(str : String)
       handle = Pointer(LibBSON::Oid).malloc(1)
       LibBSON.bson_oid_init_from_string(handle, str.cstr)
       initialize(handle)
@@ -28,7 +28,7 @@ class BSON
       String.new(buf.to_slice)
     end
 
-    def ==(other: ObjectId)
+    def ==(other : ObjectId)
       LibBSON.bson_oid_equal(@handle, other)
     end
 
@@ -36,7 +36,7 @@ class BSON
       false
     end
 
-    def <=>(other: ObjectId)
+    def <=>(other : ObjectId)
       LibBSON.bson_oid_compare(@handle, other)
     end
 

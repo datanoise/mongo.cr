@@ -3,7 +3,7 @@ class Mongo::GridFS::File
 
   property! timeout_msec
 
-  def initialize(@handle: LibMongoC::GFSFile, @timeout_msec = 5000_u32)
+  def initialize(@handle : LibMongoC::GFSFile, @timeout_msec = 5000_u32)
     raise "invalid handle" unless @handle
   end
 
@@ -121,27 +121,27 @@ class Mongo::GridFS::File
 
   # This function performs a scattered read from file, potentially blocking to
   # read from the MongoDB server.
-  def read(slice: Slice(UInt8), length)
+  def read(slice : Slice(UInt8))
     iov = LibMongoC::IOVec.new
-    iov.ion_base = slice.pointer(length)
-    iov.ion_len = length.to_u64
+    iov.ion_base = slice.to_unsafe
+    iov.ion_len = slice.bytesize.to_u64
 
     len = LibMongoC.gridfs_file_readv(self, pointerof(iov),
-                                      LibC::SizeT.cast(1),
-                                      LibC::SizeT.cast(0),
+                                      LibC::SizeT.new(1),
+                                      LibC::SizeT.new(0),
                                       @timeout_msec.to_u32)
     check_error
     len
   end
 
   # Performs a gathered write to the underlying gridfs file.
-  def write(slice: Slice(UInt8), length)
+  def write(slice : Slice(UInt8))
     iov = LibMongoC::IOVec.new
-    iov.ion_base = slice.pointer(length)
-    iov.ion_len = length.to_u64
+    iov.ion_base = slice.to_unsafe
+    iov.ion_len = slice.bytesize.to_u64
 
     len = LibMongoC.gridfs_file_writev(self, pointerof(iov),
-                                       LibC::SizeT.cast(1),
+                                       LibC::SizeT.new(1),
                                        @timeout_msec.to_u32)
     check_error
     len
