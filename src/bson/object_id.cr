@@ -25,7 +25,7 @@ class BSON
     def to_s
       buf = StaticArray(UInt8, 25).new(0_u8)
       LibBSON.bson_oid_to_string(@handle, buf)
-      String.new(buf.to_slice)
+      String.new(buf.to_slice.to_unsafe)
     end
 
     def ==(other : ObjectId)
