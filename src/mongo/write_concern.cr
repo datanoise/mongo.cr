@@ -45,7 +45,7 @@ class Mongo::WriteConcern
   end
 
   def wtag=(value)
-    LibMongoC.write_concern_set_wtag(self, value.cstr)
+    LibMongoC.write_concern_set_wtag(self, value.to_unsafe)
   end
 
   def wtimeout

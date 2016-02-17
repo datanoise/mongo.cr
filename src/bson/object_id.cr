@@ -7,7 +7,7 @@ class BSON
 
     def initialize(str : String)
       handle = Pointer(LibBSON::Oid).malloc(1)
-      LibBSON.bson_oid_init_from_string(handle, str.cstr)
+      LibBSON.bson_oid_init_from_string(handle, str.to_unsafe)
       initialize(handle)
     end
 

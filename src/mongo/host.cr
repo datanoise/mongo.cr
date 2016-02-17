@@ -11,7 +11,7 @@ class Mongo::Host
     cur = handle
     loop do
       break if cur.nil?
-      hosts << Host.new(String.new(cur.value.host.buffer), cur.value.port, cur.value.family)
+      hosts << Host.new(String.new(cur.value.host.to_unsafe), cur.value.port, cur.value.family)
       cur = cur.value.next
       break if cur.nil?
     end
