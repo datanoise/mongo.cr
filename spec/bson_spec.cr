@@ -122,55 +122,6 @@ describe BSON do
     bson["ru"].should eq("привет")
   end
 
-  it "should be able to append document" do
-    bson = BSON.new
-    bson["v"] = 1
-    bson.append_document("doc") do |child|
-      child["body"] = "document body"
-    end
-
-    doc = bson["doc"]
-    if doc.is_a?(BSON)
-      doc.has_key?("body").should be_true
-      doc["body"].should eq("document body")
-    else
-      fail "doc must be BSON object"
-    end
-  end
-
-  it "should invalidate child document after append" do
-    bson = BSON.new
-    bson["v"] = 1
-    child = nil
-    bson.append_document("doc") do |child|
-      child.not_nil!["body"] = "document body"
-    end
-    expect_raises do
-      child.not_nil!["v"] = 2
-    end
-  end
-
-  it "should be able to append an array" do
-    bson = BSON.new
-    bson["v"] = 1
-    bson.append_array("ary") do |child|
-      child << "a1"
-      child << "a2"
-      child << nil
-      child << 1
-    end
-
-    ary = bson["ary"]
-    if ary.is_a?(BSON)
-      ary.count.should eq(4)
-      ary["0"].should eq("a1")
-      ary["2"].should be_nil
-      ary["3"].should eq(1)
-    else
-      fail "ary must be BSON object"
-    end
-  end
-
   it "should be able to append symbol" do
     bson = BSON.new
     bson["s"] = BSON::Symbol.new("symbol")
@@ -313,16 +264,22 @@ describe BSON do
   end
 
   it "should be able to decode bson" do
-    bson = BSON.new
-    bson["x"] = 42
-    bson.append_array("ary") do |child|
-      child << 1
-      child << 2
-      child << 3
+    bson = BSON.build do |doc|
+      doc.field("x", 42)
+      doc.field("ary") do |appender|
+        appender.array do |array|
+          array << 1
+          array << 2
+          array << 3
+        end
+      end
+      doc.field("doc") do |appender|
+        appender.document do |doc|
+          doc.field("y", "text")
+        end
+      end
     end
-    bson.append_document("doc") do |child|
-      child["y"] = "text"
-    end
+
     h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
     bson.decode.should eq(h)
   end
@@ -334,5 +291,107 @@ describe BSON do
     ary = bson["ary"]
     fail "expected BSON" unless ary.is_a?(BSON)
     ary["0"].should eq(1)
+  end
+
+  context "build" do
+    it "yields a BSON::Builder" do
+      BSON.build do |builder|
+        builder.should be_a(BSON::Builder)
+      end
+    end
+
+    it "returns a bson" do
+      BSON.build {}.should be_a(BSON)
+    end
+
+    it "is able to add fields" do
+      bson = BSON.build do |doc|
+        doc.field("foo", "bar")
+        doc.field(:bar, "baz")
+        doc.field(1, "foobar")
+      end
+
+      bson["foo"].should eq("bar")
+      bson["bar"].should eq("baz")
+      bson["1"].should eq("foobar")
+    end
+
+    it "should be able to append document" do
+      bson = BSON.build do |doc|
+        doc.field("doc") do |appender|
+          appender.document do |child|
+            child.field("body", "document body")
+          end
+        end
+      end
+
+      doc = bson["doc"]
+      if doc.is_a?(BSON)
+        doc.has_key?("body").should be_true
+        doc["body"].should eq("document body")
+      else
+        fail "doc must be BSON object"
+      end
+    end
+
+    it "should invalidate child document after append" do
+      child_doc = nil
+      bson = BSON.build do |doc|
+        doc.field("doc") do |appender|
+          appender.document do |child|
+            child_doc = child.bson
+            child.field("body", "document body")
+          end
+        end
+      end
+
+      expect_raises do
+        child_doc.not_nil!["v"] = 2
+      end
+    end
+
+    it "should be able to append an array" do
+      bson = BSON.build do |doc|
+        doc.field("ary") do |appender|
+          appender.array do |array|
+            array << "a1"
+            array << "a2"
+            array << nil
+            array << 1
+          end
+        end
+      end
+
+      ary = bson["ary"]
+      if ary.is_a?(BSON)
+        ary.count.should eq(4)
+        ary["0"].should eq("a1")
+        ary["2"].should be_nil
+        ary["3"].should eq(1)
+      else
+        fail "ary must be BSON object"
+      end
+    end
+  end
+
+  context "from bson" do
+    it "creates an array from a bson array" do
+      bson = BSON.build_array do |doc|
+        doc << "foo"
+        doc << "bar"
+        doc << "baz"
+      end
+
+      Array(String).new(bson).should eq(%w(foo bar baz))
+    end
+
+    it "creates a hash from a bson document" do
+      bson = BSON.build do |doc|
+        doc.field(:foo, "bar")
+        doc.field(:bar, "baz")
+      end
+
+      Hash(String, String).new(bson).should eq({ "foo": "bar", "bar": "baz" })
+    end
   end
 end
