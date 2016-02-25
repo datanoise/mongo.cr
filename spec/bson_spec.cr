@@ -394,4 +394,35 @@ describe BSON do
       Hash(String, String).new(bson).should eq({ "foo": "bar", "bar": "baz" })
     end
   end
+
+  context "mapping" do
+    it "produces a bson with all specified attributes" do
+      mapping = TestMapping.new("bar", OtherTestMapping.new("foo"))
+      bson = mapping.to_bson
+      bson["foo"].should eq("bar")
+      bson["baz"].should eq(0)
+      bar = bson["bar"]
+      if bar.is_a?(BSON)
+        bar["foobar"].should eq("foo - TEST")
+      else
+        fail "bar must be a BSON object"
+      end
+    end
+
+    it "maps all attributes from a bson" do
+      bson = BSON.build do |doc|
+        doc.field :foo, "bar"
+        doc.field :bar do |appender|
+          appender.document do |doc|
+            doc.field :foobar, "foo"
+          end
+        end
+      end
+
+      mapping = TestMapping.new(bson)
+      mapping.foo.should eq("bar")
+      mapping.bar.foobar.should eq("foo")
+      mapping.baz.should eq(0)
+    end
+  end
 end
