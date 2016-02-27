@@ -34,7 +34,7 @@ class BSON
       %bson.each_pair do |key, value|
         case key
         {% for key, value in properties %}
-          when {{value[:key] || key.id.stringify}}
+          when {{(value[:key] || key).id.stringify}}
             %found{key.id} = true
             %var{key.id} =
               {% if value[:nilable] || value[:default] != nil %}

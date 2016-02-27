@@ -397,9 +397,10 @@ describe BSON do
 
   context "mapping" do
     it "produces a bson with all specified attributes" do
-      mapping = TestMapping.new("bar", OtherTestMapping.new("foo"))
+      mapping = TestMapping.new("bar", OtherTestMapping.new("foo"), "one")
       bson = mapping.to_bson
       bson["foo"].should eq("bar")
+      bson["two"].should eq("one")
       bson["baz"].should eq(0)
       bar = bson["bar"]
       if bar.is_a?(BSON)
@@ -417,11 +418,13 @@ describe BSON do
             doc.field :foobar, "foo"
           end
         end
+        doc.field :two, "one"
       end
 
       mapping = TestMapping.new(bson)
       mapping.foo.should eq("bar")
       mapping.bar.foobar.should eq("foo")
+      mapping.one.should eq("one")
       mapping.baz.should eq(0)
     end
   end

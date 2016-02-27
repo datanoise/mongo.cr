@@ -53,9 +53,10 @@ class TestMapping
   BSON.mapping({
     foo: String,
     bar: OtherTestMapping,
-    baz: { type: Int32, default: 0 }
+    one: { type: String, key: :two },
+    baz: { type: Int32, default: 0 },
   })
 
-  def initialize(@foo, @bar, @baz = 0)
+  def initialize(@foo, @bar, @one, @baz = 0)
   end
 end
