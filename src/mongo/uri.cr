@@ -9,11 +9,11 @@ class Mongo::Uri
   end
 
   def initialize(uri)
-    initialize LibMongoC.uri_new(uri.cstr)
+    initialize LibMongoC.uri_new(uri.to_unsafe)
   end
 
   def initialize(host, port)
-    initialize LibMongoC.uri_new_for_host_port(host.cstr, port.to_u16)
+    initialize LibMongoC.uri_new_for_host_port(host.to_unsafe, port.to_u16)
   end
 
   def finalize

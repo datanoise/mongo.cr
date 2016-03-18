@@ -40,7 +40,7 @@ describe Mongo::Collection do
       doc["name"].should eq("Bob")
       doc["age"].should eq(23)
       cursor.more.should be_true
-      cursor.next.should be_nil
+      cursor.next.should be_a(Iterator::Stop)
       cursor.more.should be_false
       col.remove({"name" => "Bob"})
       col.count.should eq(0)

@@ -28,4 +28,35 @@ def with_collection
   end
 end
 
+module TestConverter
+  extend self
 
+  def to_bson(bson_value, appender)
+    appender << "#{bson_value} - TEST"
+  end
+
+  def from_bson(bson_value)
+    bson_value.value as String
+  end
+end
+
+class OtherTestMapping
+  BSON.mapping({
+    foobar: { type: String, converter: TestConverter }
+  })
+
+  def initialize(@foobar : String)
+  end
+end
+
+class TestMapping
+  BSON.mapping({
+    foo: String,
+    bar: OtherTestMapping,
+    one: { type: String, key: :two },
+    baz: { type: Int32, default: 0 },
+  })
+
+  def initialize(@foo, @bar, @one, @baz = 0)
+  end
+end

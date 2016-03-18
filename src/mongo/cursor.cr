@@ -10,7 +10,7 @@ class Mongo::Cursor
     @closed = false
   end
 
-  include Enumerable(BSON)
+  include Iterator(BSON)
 
   def finalize
     close
@@ -44,18 +44,9 @@ class Mongo::Cursor
   # next document.
   # It returns `nil` if the cursor was exhausted.
   def next
-    if LibMongoC.cursor_next(self, @data)
-      check_error
-      @current = BSON.copy_from @data.value
-    end
-  end
-
-  # This method iterates the underlying cursor passing the resulted documents
-  # to the specified block.
-  def each
-    while v = self.next
-      yield v
-    end
+    return stop unless LibMongoC.cursor_next(self, @data)
+    check_error
+    BSON.copy_from @data.value
   end
 
   private def check_error
@@ -76,12 +67,6 @@ class Mongo::Cursor
   def alive?
     return false if @closed
     LibMongoC.cursor_is_alive(self)
-  end
-
-  # Fetches the cursors current document.
-  def current
-    check_closed
-    @current
   end
 
   def batch_size

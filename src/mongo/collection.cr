@@ -135,9 +135,10 @@ class Mongo::Collection
   def find_one(query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
                skip = 0, prefs = nil)
     cursor = find(query, fields, flags, skip: skip, prefs: prefs)
-    cursor.next.tap do
+    document = cursor.next.tap do
       cursor.close
     end
+    document.is_a?(Iterator::Stop) ? nil : document
   end
 
   # This method shall insert document into collection.  If no _id element is

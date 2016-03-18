@@ -1,0 +1,7 @@
+name: mongo.cr
+version: 0.1.0
+
+authors:
+  - Kent Sibilev <ksibilev@gmail.com>
+
+license: MIT

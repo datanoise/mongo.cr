@@ -1,10 +1,17 @@
 require "./bson/lib_bson"
-require "./bson/core_ext/*"
 require "./bson/*"
 
 class BSON
   include Enumerable(Value)
   include Comparable(BSON)
+
+  def self.build(&block : Builder -> _)
+    Builder.new.tap(&block).bson
+  end
+
+  def self.build_array(&block : ArrayBuilder -> _)
+    ArrayBuilder.new.tap(&block).bson
+  end
 
   def initialize(@handle : LibBSON::BSON)
     @valid = true
@@ -204,32 +211,6 @@ class BSON
       end
 
     LibBSON.bson_append_regex(handle, key, key.bytesize, value.source, options)
-  end
-
-  def append_document(key)
-    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, out child_handle)
-      return false
-    end
-    child = BSON.new(pointerof(child_handle))
-    begin
-      yield child
-    ensure
-      LibBSON.bson_append_document_end(handle, child)
-      child.invalidate
-    end
-  end
-
-  def append_array(key)
-    unless LibBSON.bson_append_array_begin(handle, key, key.bytesize, out child_handle)
-      return false
-    end
-    child = BSON.new(pointerof(child_handle))
-    begin
-      yield ArrayAppender.new(child), child
-    ensure
-      LibBSON.bson_append_array_end(handle, child)
-      child.invalidate
-    end
   end
 
   def data
