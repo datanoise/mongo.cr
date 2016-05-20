@@ -1,3 +1,5 @@
+require "../bson/lib_bson"
+
 @[Link("mongoc-1.0")]
 lib LibMongoC
   enum LogLevel

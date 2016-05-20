@@ -1,4 +1,9 @@
+require "./client"
+
 class Mongo::Database
+  @client : Mongo::Client
+  @handle : LibMongoC::Database
+
   getter client
 
   def initialize(@client, @handle = LibMongoC::Database)
@@ -155,7 +160,7 @@ class Mongo::Database
     count = 0
     loop do
       cur = names[count]
-      break if cur.nil?
+      break if cur.null?
       ret << String.new(cur)
       count += 1
     end

@@ -1,5 +1,7 @@
 class BSON
   struct Symbol
+    @name : String
+
     getter name
 
     def initialize(@name)

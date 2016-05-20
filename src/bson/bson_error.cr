@@ -1,5 +1,9 @@
 class BSON
   class BSONError < Exception
+    @domain : UInt32
+    @code : UInt32
+    @detail : String
+
     getter domain, code, detail
 
     def initialize(bson_error)

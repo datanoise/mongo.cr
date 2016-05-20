@@ -1,5 +1,7 @@
 class BSON
   struct Iter
+    @bson : BSON
+
     include Iterator(Value)
 
     def initialize(@bson)
@@ -19,6 +21,8 @@ class BSON
   end
 
   struct IterPair
+    @bson : BSON
+
     include Iterator(Value)
 
     def initialize(@bson)
@@ -40,6 +44,8 @@ class BSON
   end
 
   struct IterKey
+    @bson : BSON
+
     include Iterator(String)
 
     def initialize(@bson)

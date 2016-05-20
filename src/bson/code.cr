@@ -1,5 +1,8 @@
 class BSON
   struct Code
+    @code : String
+    @scope : BSON
+
     getter code
     getter scope
 

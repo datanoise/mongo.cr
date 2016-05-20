@@ -86,7 +86,7 @@ class Mongo::GridFS::File
   # Fetches the specified upload date of the gridfs file.
   def upload_date
     epoch = LibMongoC.gridfs_file_get_upload_date(self)
-    spec = LibC::TimeSpec.new
+    spec = LibC::Timespec.new
     spec.tv_sec = epoch / 1000
     Time.new(spec, Time::Kind::Utc)
   end

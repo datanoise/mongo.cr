@@ -9,11 +9,11 @@ class Mongo::Uri
   end
 
   def initialize(uri)
-    initialize LibMongoC.uri_new(uri.cstr)
+    initialize LibMongoC.uri_new(uri.to_unsafe)
   end
 
   def initialize(host, port)
-    initialize LibMongoC.uri_new_for_host_port(host.cstr, port.to_u16)
+    initialize LibMongoC.uri_new_for_host_port(host.to_unsafe, port.to_u16)
   end
 
   def finalize
@@ -33,12 +33,12 @@ class Mongo::Uri
 
   def database
     cstr = LibMongoC.uri_get_database(@handle)
-    String.new cstr unless cstr.nil?
+    String.new cstr unless cstr.null?
   end
 
   def options
     bson = LibMongoC.uri_get_options(self)
-    if bson.nil?
+    if bson.null?
       BSON.new
     else
       BSON.new bson
@@ -47,12 +47,12 @@ class Mongo::Uri
 
   def password
     cstr = LibMongoC.uri_get_password(self)
-    String.new cstr unless cstr.nil?
+    String.new cstr unless cstr.null?
   end
 
   def read_prefs
     bson = LibMongoC.uri_get_read_prefs(self)
-    if bson.nil?
+    if bson.null?
       BSON.new
     else
       BSON.new bson
@@ -61,32 +61,32 @@ class Mongo::Uri
 
   def replica_set
     cstr = LibMongoC.uri_get_replica_set(self)
-    String.new cstr unless cstr.nil?
+    String.new cstr unless cstr.null?
   end
 
   def string
     cstr = LibMongoC.uri_get_string(self)
-    String.new cstr unless cstr.nil?
+    String.new cstr unless cstr.null?
   end
 
   def username
     cstr = LibMongoC.uri_get_username(self)
-    String.new cstr unless cstr.nil?
+    String.new cstr unless cstr.null?
   end
 
   def credentials
     cstr = LibMongoC.uri_get_credentials(self)
-    BSON.new cstr unless cstr.nil?
+    BSON.new cstr unless cstr.null?
   end
 
   def auth_source
     cstr = LibMongoC.uri_get_auth_source(self)
-    String.new cstr unless cstr.nil?
+    String.new cstr unless cstr.null?
   end
 
   def auth_mechanism
     cstr = LibMongoC.uri_get_auth_mechanism(self)
-    String.new cstr unless cstr.nil?
+    String.new cstr unless cstr.null?
   end
 
   def mechanism_properties
@@ -101,7 +101,7 @@ class Mongo::Uri
 
   def self.unescape(uri)
     cstr = LibMongoC.uri_unescape(uri)
-    return "" unless cstr.nil?
+    return "" unless cstr.null?
     String.new(cstr).tap do
       LibBSON.bson_destroy(cstr)
     end
@@ -109,7 +109,7 @@ class Mongo::Uri
 
   def write_concern
     handle = LibMongoC.uri_get_write_concern(self)
-    if handle.nil?
+    if handle.null?
       WriteConcern.new
     else
       WriteConcern.new handle

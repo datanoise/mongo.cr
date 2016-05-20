@@ -1,5 +1,7 @@
 class BSON
   struct ArrayAppender
+    @bson : BSON
+
     def initialize(@bson)
       @count = 0
     end

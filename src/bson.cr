@@ -3,6 +3,8 @@ require "./bson/core_ext/*"
 require "./bson/*"
 
 class BSON
+  @handle : LibBSON::BSON
+
   include Enumerable(Value)
   include Comparable(BSON)
 

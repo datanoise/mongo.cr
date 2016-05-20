@@ -1,11 +1,14 @@
 require "./uri"
 require "./stream"
+require "./lib_mongo"
 
 # Client class provides access to a MongoDB node, replica-set, or
 # sharded-cluster. It maintains management of underlying sockets and routing to
 # individual nodes based on ReadPrefs and WriteConcern classes.
 #
 class Mongo::Client
+  @handle : LibMongoC::Client
+
   def initialize(@handle = LibMongoC::Client)
     raise "invalid handle" unless @handle
   end

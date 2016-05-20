@@ -7,7 +7,7 @@ class BSON
 
     def initialize(str : String)
       handle = Pointer(LibBSON::Oid).malloc(1)
-      LibBSON.bson_oid_init_from_string(handle, str.cstr)
+      LibBSON.bson_oid_init_from_string(handle, str.to_unsafe)
       initialize(handle)
     end
 
@@ -46,7 +46,7 @@ class BSON
 
     def time
       t = LibBSON.bson_oid_get_time_t(@handle)
-      ts = LibC::TimeSpec.new
+      ts = LibC::Timespec.new
       ts.tv_sec = t
       Time.new(ts, Time::Kind::Utc)
     end

@@ -1,4 +1,16 @@
+require "../bson"
+
 class Mongo::IndexOpt
+  @background : Bool
+  @unique : Bool
+  @name : String
+  @drop_dups : Bool
+  @sparse : Bool
+  @expire_after_seconds : Int32
+  @weights : BSON?
+  @default_language : String?
+  @language_override : String?
+
   property background
   property unique
   property name
@@ -20,7 +32,7 @@ class Mongo::IndexOpt
     @opt.background = @background
     @opt.unique = @unique
     if name = @name
-      @opt.name = name.cstr
+      @opt.name = name.to_unsafe
     end
     @opt.drop_dups = @drop_dups
     @opt.sparse = @sparse
@@ -29,10 +41,10 @@ class Mongo::IndexOpt
       @opt.weights = weights.to_unsafe
     end
     if default_language = @default_language
-      @opt.default_language = default_language.cstr
+      @opt.default_language = default_language.to_unsafe
     end
     if language_override = @language_override
-      @opt.language_override = language_override.cstr
+      @opt.language_override = language_override.to_unsafe
     end
 
     pointerof(@opt)

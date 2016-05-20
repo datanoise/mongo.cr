@@ -1,7 +1,12 @@
 require "./index_opt"
 require "./read_prefs"
+require "./database"
 
 class Mongo::Collection
+  @database : Mongo::Database
+  @handle : LibMongoC::Collection
+  @owned : Bool
+
   getter database
 
   def initialize(@database, @handle : LibMongoC::Collection, @owned = true)

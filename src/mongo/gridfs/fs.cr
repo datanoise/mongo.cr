@@ -1,4 +1,9 @@
+require "../database"
+
 class Mongo::GridFS::FS
+  @database : Mongo::Database
+  @handle : LibMongoC::GridFS
+
   getter database
 
   def initialize(@database, @handle : LibMongoC::GridFS)
@@ -12,9 +17,9 @@ class Mongo::GridFS::FS
   # This function shall create a new file.
   def create_file(filename, content_type = nil, md5 = nil, aliases = BSON.new, metadata = BSON.new, chunk_size = 0)
     opt = LibMongoC::GFSFileOpt.new
-    opt.md5 = md5.cstr if md5
-    opt.filename = filename.cstr
-    opt.content_type = content_type.cstr if content_type
+    opt.md5 = md5.to_unsafe if md5
+    opt.filename = filename.to_unsafe
+    opt.content_type = content_type.to_unsafe if content_type
     opt.aliases = aliases.to_unsafe
     opt.metadata = metadata.to_unsafe
     opt.chunk_size = chunk_size.to_u32

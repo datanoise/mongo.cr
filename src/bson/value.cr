@@ -1,5 +1,9 @@
+require "./lib_bson"
+
 class BSON
   struct Value
+    @handle : LibBSON::Value
+
     getter handle
 
     def initialize(src : LibBSON::BSONValue)
@@ -33,7 +37,7 @@ class BSON
       when LibBSON::Type::BSON_TYPE_BOOL
         v.v_bool
       when LibBSON::Type::BSON_TYPE_DATE_TIME
-        spec = LibC::TimeSpec.new
+        spec = LibC::Timespec.new
         spec.tv_sec = v.v_datetime / 1000
         Time.new(spec, Time::Kind::Utc)
       when LibBSON::Type::BSON_TYPE_NULL
