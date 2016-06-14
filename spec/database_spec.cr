@@ -16,8 +16,8 @@ describe Mongo::Database do
 
     db.has_collection?("my_col").should be_true
 
-    col = db.find_collections.next.not_nil!
-    col["name"].should eq("my_col")
+    col = db.find_collections.find {|col| col["name"] == "my_col"}
+    col.should_not be_nil
 
     db.collection_names.includes?("my_col").should be_true
 

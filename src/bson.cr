@@ -40,6 +40,7 @@ class BSON
   end
 
   protected def invalidate
+    finalize
     @valid = false
   end
 
@@ -209,10 +210,11 @@ class BSON
   end
 
   def append_document(key)
-    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, out child_handle)
+    child_handle = LibBSON.bson_new()
+    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, child_handle)
       return false
     end
-    child = BSON.new(pointerof(child_handle))
+    child = BSON.new(child_handle)
     begin
       yield child
     ensure
@@ -222,10 +224,11 @@ class BSON
   end
 
   def append_array(key)
-    unless LibBSON.bson_append_array_begin(handle, key, key.bytesize, out child_handle)
+    child_handle = LibBSON.bson_new()
+    unless LibBSON.bson_append_array_begin(handle, key, key.bytesize, child_handle)
       return false
     end
-    child = BSON.new(pointerof(child_handle))
+    child = BSON.new(child_handle)
     begin
       yield ArrayAppender.new(child), child
     ensure
