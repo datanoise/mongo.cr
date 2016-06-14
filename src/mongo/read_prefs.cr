@@ -3,7 +3,7 @@ class Mongo::ReadPrefs
     raise "invalid handle" unless @handle
   end
 
-  def initialize(mode = LibMongoC::ReadMode::PRIMARY : LibMongoC::ReadMode)
+  def initialize(mode : LibMongoC::ReadMode::PRIMARY = LibMongoC::ReadMode)
     initialize LibMongoC.read_prefs_new(mode)
   end
 
