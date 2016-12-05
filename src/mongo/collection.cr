@@ -59,17 +59,16 @@ class Mongo::Collection
   # Counts the number of documents matching the specified criteria.
   def count(query = BSON.new, flags = LibMongoC::QueryFlags::NONE,
             skip = 0, limit = 0, opts = nil, prefs = nil)
-    ret =
-      if opts
-        LibMongoC.collection_count_with_opts(self, flags, query.to_bson, skip.to_i64,
-                                             limit.to_i64, opts.to_bson, prefs, out error1)
-      else
-        LibMongoC.collection_count(self, flags, query.to_bson, skip.to_i64, limit.to_i64, prefs, out error2)
-      end
-    if ret == -1
-      raise BSON::BSONError.new(opts ? pointerof(error1) : pointerof(error2))
+    if opts
+      ret = LibMongoC.collection_count_with_opts(self, flags, query.to_bson, skip.to_i64,
+                                                 limit.to_i64, opts.to_bson, prefs, out error1)
+      raise BSON::BSONError.new(pointerof(error1)) if ret == -1
+      ret
+    else
+      ret = LibMongoC.collection_count(self, flags, query.to_bson, skip.to_i64, limit.to_i64, prefs, out error2)
+      raise BSON::BSONError.new(pointerof(error2)) if ret == -1
+      ret
     end
-    ret
   end
 
   # This method requests that a collection be dropped, including all indexes

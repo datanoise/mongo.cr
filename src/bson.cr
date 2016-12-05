@@ -60,7 +60,7 @@ class BSON
   def to_json
     cstr = LibBSON.bson_as_json(handle, out length)
     ret = String.new(cstr, length)
-    LibBSON.bson_free(cstr as Void*)
+    LibBSON.bson_free(cstr.as(Void*))
     ret
   end
 

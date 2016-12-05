@@ -254,17 +254,17 @@ lib LibMongoC
   fun database_get_collection_names = mongoc_database_get_collection_names(db: Database, error: BSONError*): UInt8**
   fun database_get_collection = mongoc_database_get_collection(db: Database, name: UInt8*): Collection
 
-  ifdef windows
+  {% if flag?(:windows) %}
     struct IOVec
       ion_len: UInt64
       iov_base: UInt8*
     end
-  else
+  {% else %}
     struct IOVec
       ion_base: UInt8*
       ion_len: LibC::SizeT
     end
-  end
+  {% end %}
 
   struct Stream
     type: Int32

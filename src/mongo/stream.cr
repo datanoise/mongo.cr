@@ -6,12 +6,12 @@ module Mongo::Stream
   def self.initiator(uri : LibMongoC::Uri, host : LibMongoC::HostList, user_data : Void*, error : LibBSON::BSONError*)
     socket = TCPSocket.new(String.new(host.value.host.buffer), host.value.port)
 
-    stream = LibC.malloc(sizeof(LibMongoC::Stream).to_u32) as LibMongoC::Stream*
+    stream = LibC.malloc(sizeof(LibMongoC::Stream).to_u32).as(LibMongoC::Stream*)
 
     stream.value.type = 0
     stream.value.destroy = -> (stream : LibMongoC::Stream*) {
       @@registry.delete(stream)
-      LibC.free(stream as Void*)
+      LibC.free(stream.as(Void*))
     }
     stream.value.close = -> (stream : LibMongoC::Stream*) {
       io = Stream.get_io(stream)

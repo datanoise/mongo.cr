@@ -32,7 +32,7 @@ class BSON
         raise "Deprecated BSON_TYPE_UNDEFINED must not be used"
       when LibBSON::Type::BSON_TYPE_OID
         oid = Pointer(LibBSON::Oid).malloc(1)
-        LibBSON.bson_oid_copy(pointerof(v) as Pointer(LibBSON::Oid), oid)
+        LibBSON.bson_oid_copy(pointerof(v).as(Pointer(LibBSON::Oid)), oid)
         ObjectId.new(oid)
       when LibBSON::Type::BSON_TYPE_BOOL
         v.v_bool
