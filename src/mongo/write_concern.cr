@@ -41,7 +41,7 @@ class Mongo::WriteConcern
 
   def wtag
     cstr = LibMongoC.write_concern_get_wtag(self)
-    String.new(cstr) unless cstr.nil?
+    String.new(cstr) unless cstr.null?
   end
 
   def wtag=(value)

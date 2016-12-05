@@ -9,12 +9,12 @@ require "./lib_mongo"
 class Mongo::Client
   @handle : LibMongoC::Client
 
-  def initialize(@handle = LibMongoC::Client)
+  def initialize(@handle : LibMongoC::Client)
     raise "invalid handle" unless @handle
   end
 
   # Creates a new Client using uri expressed as a String or Uri class instance.
-  def initialize(uri : String | Uri)
+  def initialize(uri : String | Uri = "mongodb://localhost")
     handle =
       if uri.is_a?(String)
         LibMongoC.client_new(uri)
@@ -91,7 +91,7 @@ class Mongo::Client
     count = 0
     loop do
       cur = names[count]
-      break if cur.nil?
+      break if cur.null?
       ret << String.new(cur)
       count += 1
     end
