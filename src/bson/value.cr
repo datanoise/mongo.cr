@@ -11,10 +11,6 @@ class BSON
       @handle = dst
     end
 
-    def finalize
-      LibBSON.bson_value_destroy(@handle)
-    end
-
     def value
       v = @handle.value
       case @handle.v_type
