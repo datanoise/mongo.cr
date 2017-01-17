@@ -1,7 +1,7 @@
 require "./lib_bson"
 
 class BSON
-  struct Value
+  class Value
     @handle : LibBSON::Value
 
     getter handle
@@ -12,7 +12,7 @@ class BSON
     end
 
     def finalize
-      LibBSON.bson_value_destroy(@handle)
+      LibBSON.bson_value_destroy(pointerof(@handle))
     end
 
     def value
