@@ -15,7 +15,6 @@ This library provides binding for MongoDB C Driver.
 On Mac OSX use `homebrew` to install the required libraries:
 
 ```
-$ brew install libbson
 $ brew install mongo-c
 ```
 
@@ -42,5 +41,3 @@ end
 # License
 
 MIT clause - see LICENSE for more details.
-
-
