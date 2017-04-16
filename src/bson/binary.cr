@@ -14,6 +14,25 @@ class BSON
     def initialize(@subtype : SubType, @data : Slice(UInt8))
     end
 
+    def self.new(binary : LibBSON::Binary)
+      data = Slice(UInt8).new(binary.data, binary.len)
+
+      case binary.sub_type
+      when LibBSON::SubType::BSON_SUBTYPE_BINARY
+        new(SubType::Binary, data)
+      when LibBSON::SubType::BSON_SUBTYPE_FUNCTION
+        new(SubType::Function, data)
+      when LibBSON::SubType::BSON_SUBTYPE_UUID
+        new(SubType::UUID, data)
+      when LibBSON::SubType::BSON_SUBTYPE_MD5
+        new(SubType::MD5, data)
+      when LibBSON::SubType::BSON_SUBTYPE_USER
+        new(SubType::User, data)
+      else
+        raise "unable to handle subtype #{binary.sub_type}"
+      end
+    end
+
     def to_raw_type
       case @subtype
       when SubType::Binary
