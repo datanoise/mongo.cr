@@ -335,4 +335,11 @@ describe BSON do
     fail "expected BSON" unless ary.is_a?(BSON)
     ary["0"].should eq(1)
   end
+
+  it "should be able to read binary data" do
+    bson = BSON.new
+    bson["bin"] = BSON::Binary.new(BSON::Binary::SubType::Binary, "binary".to_slice)
+    value = bson["bin"].as(BSON::Binary)
+    String.new(value.data).should eq("binary")
+  end
 end

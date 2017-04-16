@@ -68,6 +68,8 @@ class BSON
         MaxKey.new
       when LibBSON::Type::BSON_TYPE_MINKEY
         MinKey.new
+      when LibBSON::Type::BSON_TYPE_BINARY
+        Binary.new(v.v_binary)
       else
         raise "Invalid BSON Value type #{@handle.v_type}"
       end
