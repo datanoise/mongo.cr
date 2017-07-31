@@ -23,7 +23,7 @@ class BSON
 
   def self.from_json(json)
     handle = LibBSON.bson_new_from_json(json, json.bytesize, out error)
-    if error
+    if error && error.message[0] != 0
       raise BSONError.new(pointerof(error))
     end
     new(handle)
