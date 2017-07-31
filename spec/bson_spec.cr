@@ -335,4 +335,17 @@ describe BSON do
     fail "expected BSON" unless ary.is_a?(BSON)
     ary["0"].should eq(1)
   end
+
+  it "should decode json" do
+    s = "{ \"sval\" : \"1234\", \"ival\" : 1234 }"
+    bson = BSON.from_json s
+    bson.to_s.should eq s
+  end
+
+  it "should error json" do
+    s = "{ this = wrong }"
+    expect_raises do
+      bson = BSON.from_json s
+    end
+  end
 end
