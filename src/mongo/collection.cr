@@ -128,8 +128,10 @@ class Mongo::Collection
   # must be placed inside of {"$query": {}} as specified by the server
   # documentation.
   # The results are passed to the specified block.
-  def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
+  def find(query = nil, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
            skip = 0, limit = 0, batch_size = 0, prefs = nil)
+    findall = {} of String => String
+    query = !query.nil? ? query : findall
     find(query, fields, flags, skip, limit, batch_size, prefs).each do |doc|
       yield doc
     end
