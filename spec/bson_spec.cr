@@ -43,8 +43,8 @@ end
 describe BSON::Timestamp do
   it "should be comparable" do
     t = Time.now
-    t1 = BSON::Timestamp.new(t.ticks, 1)
-    t2 = BSON::Timestamp.new(t.ticks, 2)
+    t1 = BSON::Timestamp.new(t.epoch_ms, 1)
+    t2 = BSON::Timestamp.new(t.epoch_ms, 2)
     t2.should be > t1
   end
 end
@@ -145,7 +145,7 @@ describe BSON do
     bson.append_document("doc") do |child|
       child.not_nil!["body"] = "document body"
     end
-    expect_raises do
+    expect_raises(Exception) do
       child.not_nil!["v"] = 2
     end
   end
@@ -197,8 +197,8 @@ describe BSON do
   it "should be able to append timestamp" do
     t = Time.now
     bson = BSON.new
-    bson["ts"] = BSON::Timestamp.new(t.ticks, 1)
-    bson["ts"].should eq(BSON::Timestamp.new(t.ticks, 1))
+    bson["ts"] = BSON::Timestamp.new(t.epoch_ms, 1)
+    bson["ts"].should eq(BSON::Timestamp.new(t.epoch_ms, 1))
   end
 
   it "should be able to append regex" do
@@ -344,7 +344,7 @@ describe BSON do
 
   it "should error json" do
     s = "{ this = wrong }"
-    expect_raises do
+    expect_raises(Exception) do
       bson = BSON.from_json s
     end
   end

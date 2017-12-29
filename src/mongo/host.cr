@@ -15,6 +15,7 @@ class Mongo::Host
     cur = handle
     loop do
       break if cur.null?
+      puts "value: #{cur.value.port}"
       hosts << Host.new(String.new(cur.value.host.to_unsafe), cur.value.port, cur.value.family)
       cur = cur.value.next
       break if cur.null?
@@ -22,4 +23,3 @@ class Mongo::Host
     hosts
   end
 end
-

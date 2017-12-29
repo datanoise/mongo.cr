@@ -10,6 +10,14 @@ describe Mongo::Uri do
     host.port.should eq(27017)
   end
 
+  it "should work with various ports" do
+    uri = Mongo::Uri.new "mongodb://localhost:1443"
+    uri.hosts.size.should eq(1)
+    host = uri.hosts.first
+    host.host.should eq("localhost")
+    host.port.should eq(1443)
+  end
+
   it "should be able to create new uri with host and port" do
     uri = Mongo::Uri.new "localhost", 27017
     uri.hosts.size.should eq(1)

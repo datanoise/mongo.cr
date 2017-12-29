@@ -1,5 +1,4 @@
-class Mongo::GridFS::File
-  include IO
+class Mongo::GridFS::File < IO
 
   property! timeout_msec
 
@@ -172,4 +171,3 @@ class Mongo::GridFS::File
     @handle
   end
 end
-
