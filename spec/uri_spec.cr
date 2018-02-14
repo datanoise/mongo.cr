@@ -33,7 +33,7 @@ describe Mongo::Uri do
   end
 
   it "should be able to parse auth_source and auth_mechanism" do
-    uri = Mongo::Uri.new "mongodb://christian:secret@localhost:27017?authMechanism=GSSAPI"
+    uri = Mongo::Uri.new "mongodb://christian:secret@domain.com:27017/?authMechanism=GSSAPI"
     uri.auth_mechanism.should eq("GSSAPI")
     uri.auth_source.should eq("$external")
     uri.username.should eq("christian")
