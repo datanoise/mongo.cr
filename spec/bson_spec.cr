@@ -40,6 +40,7 @@ describe BSON::ObjectId do
   end
 end
 
+
 describe BSON::Timestamp do
   it "should be comparable" do
     t = Time.now

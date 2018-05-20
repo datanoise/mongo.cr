@@ -1,4 +1,6 @@
 class Mongo::GridFS::File < IO
+  #include IO
+  # breaking change moved IO from module to class in release 0.24.1
 
   property! timeout_msec
 
