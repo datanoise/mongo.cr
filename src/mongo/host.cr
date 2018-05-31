@@ -22,4 +22,3 @@ class Mongo::Host
     hosts
   end
 end
-

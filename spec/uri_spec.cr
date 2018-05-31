@@ -10,6 +10,14 @@ describe Mongo::Uri do
     host.port.should eq(27017)
   end
 
+  it "should work with various ports" do
+    uri = Mongo::Uri.new "mongodb://localhost:1443"
+    uri.hosts.size.should eq(1)
+    host = uri.hosts.first
+    host.host.should eq("localhost")
+    host.port.should eq(1443)
+  end
+
   it "should be able to create new uri with host and port" do
     uri = Mongo::Uri.new "localhost", 27017
     uri.hosts.size.should eq(1)
@@ -25,7 +33,7 @@ describe Mongo::Uri do
   end
 
   it "should be able to parse auth_source and auth_mechanism" do
-    uri = Mongo::Uri.new "mongodb://christian:secret@localhost:27017/?authMechanism=GSSAPI"
+    uri = Mongo::Uri.new "mongodb://christian:secret@domain.com:27017/?authMechanism=GSSAPI"
     uri.auth_mechanism.should eq("GSSAPI")
     uri.auth_source.should eq("$external")
     uri.username.should eq("christian")
