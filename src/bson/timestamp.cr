@@ -14,6 +14,12 @@ class BSON
       initialize(handle)
     end
 
+    # @param timestamp epoch seconds
+    # @param increment in seconds
+    def initialize(timestamp : Int32 | Int64, increment)
+      initialize(timestamp.to_u32, increment)
+    end
+
     def timestamp
       @handle.ts
     end
