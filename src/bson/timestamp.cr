@@ -7,7 +7,7 @@ class BSON
 
     # @param timestamp epoch seconds
     # @param increment in seconds
-    def initialize(timestamp : UInt32, increment)
+    def initialize(timestamp : Int, increment)
       handle = LibBSON::Timestamp.new
       handle.ts = timestamp.to_u32
       handle.incr = increment.to_u32
