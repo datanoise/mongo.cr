@@ -4,7 +4,7 @@ end
 
 def create_database
   client = create_client
-  client["my_db_#{Time.now.epoch}"]
+  client["my_db_#{Time.now.to_unix}"]
 end
 
 def create_collection
