@@ -8,7 +8,7 @@ This library provides binding for MongoDB C Driver. The goal is to provide a dri
 
 # Requirements
 
-- Crystal language version 0.20 and higher.
+- Crystal language version 0.27.0 and higher.
 - libmongoc version 1.1.0
 - libbson verion 1.1.0
 
