@@ -173,7 +173,7 @@ class BSON
   end
 
   def []=(key, value : Time)
-    LibBSON.bson_append_date_time(handle, key, key.bytesize, value.to_utc.epoch * 1000)
+    LibBSON.bson_append_date_time(handle, key, key.bytesize, value.to_utc.to_unix * 1000)
   end
 
   def []=(key, value : Timestamp)
