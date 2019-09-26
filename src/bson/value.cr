@@ -39,7 +39,7 @@ class BSON
       when LibBSON::Type::BSON_TYPE_DATE_TIME
         spec = LibC::Timespec.new
         spec.tv_sec = v.v_datetime / 1000
-        Time.new(spec, Time::Kind::Utc)
+        Time.new(spec, Time::Location::UTC)
       when LibBSON::Type::BSON_TYPE_NULL
         nil
       when LibBSON::Type::BSON_TYPE_REGEX
