@@ -18,7 +18,7 @@ class BSON
   end
 
   def finalize
-    LibBSON.bson_destroy(@handle) if @valid
+    LibBSON.bson_destroy(@handle)
   end
 
   def self.from_json(json)

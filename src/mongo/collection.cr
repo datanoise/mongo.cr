@@ -208,6 +208,7 @@ class Mongo::Collection
       raise BSON::BSONError.new(pointerof(error))
     end
     doc = BSON.copy_from pointerof(reply)
+	LibBSON.bson_destroy(pointerof(reply))
     value = doc["value"]
     return nil unless value.is_a?(BSON)
     value

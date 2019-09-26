@@ -65,7 +65,9 @@ class Mongo::BulkOperation
     if hint == 0
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    results = BSON.copy_from pointerof(reply)
+	LibBSON.bson_destroy(pointerof(reply))
+	results
   end
 
   def to_unsafe
