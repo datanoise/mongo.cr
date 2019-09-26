@@ -13,7 +13,9 @@ lib LibMongoC
   end
 
   fun log_set_handler = mongoc_log_set_handler((LogLevel, UInt8*, UInt8*, Void*) ->, Void*)
-
+  fun mongo_init = mongoc_init (Void*)
+  fun mongo_cleanup = mongoc_cleanup (Void*)  
+  
   alias BSON = LibBSON::BSON
   alias BSONError = LibBSON::BSONError
 

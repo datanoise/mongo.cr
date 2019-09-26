@@ -38,4 +38,6 @@ module Mongo
   LibMongoC.log_set_handler ->(level, domain, msg, user_data) {
     self.log(level, String.new(domain), String.new(msg))
   }, nil
+  LibMongoC.mongo_init(nil)
+  at_exit { LibMongoC.mongo_cleanup(nil) }
 end
