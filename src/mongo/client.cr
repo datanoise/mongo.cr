@@ -82,7 +82,7 @@ class Mongo::Client
   # in the database named `db_name`.
   def collection(db_name, collection_name)
     #database(db_name).collection(collection_name)
-    Collection.new self, LibMongoC.client_get_collection(nil, db_name,collection_name)
+    Collection.new nil, LibMongoC.client_get_collection(self, db_name,collection_name)
   end
 
   # This method queries the MongoDB server for a list of known databases.
