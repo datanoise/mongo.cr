@@ -50,7 +50,9 @@ class Mongo::Collection
   # This is a simplified interface to command that returns the first result document.
   def command_simple(command, prefs = nil)
     if LibMongoC.collection_command_simple(self, command.to_bson, out reply, out error)
-      BSON.copy_from pointerof(reply)
+        repl = BSON.copy_from pointerof(reply)
+        LibBSON.bson_destroy(pointerof(reply))
+        repl
     else
       raise BSON::BSONError.new(pointerof(error))
     end
@@ -219,7 +221,9 @@ class Mongo::Collection
     unless LibMongoC.collection_stats(self, options.to_bson, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   # Fetches the default read preferences to use for collection. Operations
@@ -275,7 +279,9 @@ class Mongo::Collection
     unless LibMongoC.collection_validate(self, options.to_bson, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   # This method shall begin a new bulk operation. Use returned `BulkOperation`

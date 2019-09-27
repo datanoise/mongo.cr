@@ -59,7 +59,9 @@ class Mongo::Client
     unless LibMongoC.client_command_simple(self, db_name, command, prefs, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   def kill_cursor(cursor_id)
@@ -122,7 +124,9 @@ class Mongo::Client
     unless LibMongoC.client_get_server_status(self, prefs, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   # Create GridFS instance.
@@ -200,8 +204,7 @@ class Mongo::ClientPool
     initialize handle
   end
   def pop
-    cl = Client.new(LibMongoC.client_pool_pop(self),true)
-    cl
+    Client.new(LibMongoC.client_pool_pop(self),true)
   end
   def push(client : Client)
     LibMongoC.client_pool_push(self,client)
@@ -209,7 +212,7 @@ class Mongo::ClientPool
   def try_pop
     handle = LibMongoC.client_pool_try_pop(self)
     if handle
-        cl = Client.new(handle,true)
+        Client.new(handle,true)
     else
         nil
     end
