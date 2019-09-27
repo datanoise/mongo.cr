@@ -3,7 +3,7 @@ require "./read_prefs"
 require "./database"
 
 class Mongo::Collection
-  @database : Mongo::Database
+  @database : Mongo::Database?
   @handle : LibMongoC::Collection
   @owned : Bool
 
