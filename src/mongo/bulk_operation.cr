@@ -6,10 +6,16 @@ class Mongo::BulkOperation
   def initialize(@handle : LibMongoC::BulkOperation)
     raise "invalid handle" unless @handle
     @executed = false
+    @valid = true
+  end
+
+  def invalidate
+    LibMongoC.bulk_operation_destroy(@handle)
+    @valid = false
   end
 
   def finalize
-    LibMongoC.bulk_operation_destroy(@handle)
+    LibMongoC.bulk_operation_destroy(@handle) if @valid
   end
 
   # Queue an insert of a single document into a bulk operation. The insert is
