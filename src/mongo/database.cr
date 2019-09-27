@@ -11,7 +11,7 @@ class Mongo::Database
   end
 
   def finalize
-    LibMongoC.database_destroy(self)
+    LibMongoC.database_destroy(@handle)
   end
 
   # Fetches the name of the database.

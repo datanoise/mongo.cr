@@ -6,19 +6,26 @@ class Mongo::Collection
   @database : Mongo::Database?
   @handle : LibMongoC::Collection
   @owned : Bool
-
+  @valid : Bool
   getter database
 
   def initialize(@database, @handle : LibMongoC::Collection, @owned = true)
     raise "invalid handle" unless @handle
+    @valid = true
   end
 
   def initialize(@handle : LibMongoC::Collection, @owned = true)
     raise "invalid handle" unless @handle
+    @valid = true
+  end
+
+  def invalidate
+    finalize
+    @valid = false
   end
 
   def finalize
-    LibMongoC.collection_destroy(self) if @owned
+    LibMongoC.collection_destroy(@handle) if @owned && @valid
   end
 
   # This method shall execute an aggregation query on the underlying 'Collection'
