@@ -10,8 +10,8 @@ class Mongo::BulkOperation
   end
 
   def invalidate
-    LibMongoC.bulk_operation_destroy(@handle)
     @valid = false
+    LibMongoC.bulk_operation_destroy(@handle)
   end
 
   def finalize

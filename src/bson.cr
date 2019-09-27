@@ -40,8 +40,8 @@ class BSON
   end
 
   def invalidate
-    finalize
     @valid = false
+    LibBSON.bson_destroy(@handle)
   end
 
   protected def handle

@@ -20,7 +20,7 @@ class Mongo::Collection
   end
 
   def invalidate
-    finalize
+    LibMongoC.collection_destroy(@handle)
     @valid = false
   end
 
@@ -223,6 +223,7 @@ class Mongo::Collection
     doc = BSON.copy_from pointerof(reply)
 	LibBSON.bson_destroy(pointerof(reply))
     value = doc["value"]
+    LibBSON.bson_destroy(doc)
     return nil unless value.is_a?(BSON)
     value
   end
