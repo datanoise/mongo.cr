@@ -13,6 +13,10 @@ class Mongo::Collection
     raise "invalid handle" unless @handle
   end
 
+  def initialize(@handle : LibMongoC::Collection, @owned = true)
+    raise "invalid handle" unless @handle
+  end
+
   def finalize
     LibMongoC.collection_destroy(self) if @owned
   end
