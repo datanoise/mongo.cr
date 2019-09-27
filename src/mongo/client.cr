@@ -81,7 +81,8 @@ class Mongo::Client
   # Get a newly allocated Collection for the collection named `collection_name`
   # in the database named `db_name`.
   def collection(db_name, collection_name)
-    database(db_name).collection(collection_name)
+    #database(db_name).collection(collection_name)
+    Collection.new self, LibMongoC.client_get_collection(nil, db_name,colelction_name)
   end
 
   # This method queries the MongoDB server for a list of known databases.
