@@ -3,18 +3,29 @@ require "./read_prefs"
 require "./database"
 
 class Mongo::Collection
-  @database : Mongo::Database
+  @database : Mongo::Database?
   @handle : LibMongoC::Collection
   @owned : Bool
-
+  @valid : Bool
   getter database
 
   def initialize(@database, @handle : LibMongoC::Collection, @owned = true)
     raise "invalid handle" unless @handle
+    @valid = true
+  end
+
+  def initialize(@handle : LibMongoC::Collection, @owned = true)
+    raise "invalid handle" unless @handle
+    @valid = true
+  end
+
+  def invalidate
+    @valid = false
+    LibMongoC.collection_destroy(@handle)
   end
 
   def finalize
-    LibMongoC.collection_destroy(self) if @owned
+    LibMongoC.collection_destroy(@handle) if @owned && @valid
   end
 
   # This method shall execute an aggregation query on the underlying 'Collection'
@@ -50,7 +61,9 @@ class Mongo::Collection
   # This is a simplified interface to command that returns the first result document.
   def command_simple(command, prefs = nil)
     if LibMongoC.collection_command_simple(self, command.to_bson, out reply, out error)
-      BSON.copy_from pointerof(reply)
+        repl = BSON.copy_from pointerof(reply)
+        LibBSON.bson_destroy(pointerof(reply))
+        repl
     else
       raise BSON::BSONError.new(pointerof(error))
     end
@@ -208,7 +221,9 @@ class Mongo::Collection
       raise BSON::BSONError.new(pointerof(error))
     end
     doc = BSON.copy_from pointerof(reply)
+	LibBSON.bson_destroy(pointerof(reply))
     value = doc["value"]
+    doc.invalidate
     return nil unless value.is_a?(BSON)
     value
   end
@@ -218,7 +233,9 @@ class Mongo::Collection
     unless LibMongoC.collection_stats(self, options.to_bson, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   # Fetches the default read preferences to use for collection. Operations
@@ -274,7 +291,9 @@ class Mongo::Collection
     unless LibMongoC.collection_validate(self, options.to_bson, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   # This method shall begin a new bulk operation. Use returned `BulkOperation`

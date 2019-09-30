@@ -89,7 +89,7 @@ class Mongo::GridFS::File < IO
     epoch = LibMongoC.gridfs_file_get_upload_date(self)
     spec = LibC::Timespec.new
     spec.tv_sec = epoch / 1000
-    Time.new(spec, Time::Kind::Utc)
+    Time.new(spec, Time::Location::UTC)
   end
 
   # Removes file and its data chunks from the MongoDB server.

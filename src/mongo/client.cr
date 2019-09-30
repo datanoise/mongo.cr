@@ -8,8 +8,9 @@ require "./lib_mongo"
 #
 class Mongo::Client
   @handle : LibMongoC::Client
-
-  def initialize(@handle : LibMongoC::Client)
+  property pooled : Bool = false
+  
+  def initialize(@handle : LibMongoC::Client,@pooled : Bool = false)
     raise "invalid handle" unless @handle
   end
 
@@ -58,7 +59,9 @@ class Mongo::Client
     unless LibMongoC.client_command_simple(self, db_name, command, prefs, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   def kill_cursor(cursor_id)
@@ -78,7 +81,8 @@ class Mongo::Client
   # Get a newly allocated Collection for the collection named `collection_name`
   # in the database named `db_name`.
   def collection(db_name, collection_name)
-    database(db_name).collection(collection_name)
+    #database(db_name).collection(collection_name)
+    Collection.new LibMongoC.client_get_collection(self, db_name,collection_name)
   end
 
   # This method queries the MongoDB server for a list of known databases.
@@ -121,7 +125,9 @@ class Mongo::Client
     unless LibMongoC.client_get_server_status(self, prefs, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   # Create GridFS instance.
@@ -173,9 +179,59 @@ class Mongo::Client
   end
 
   def finalize
-    LibMongoC.client_destroy(self)
+    if !@pooled
+        LibMongoC.client_destroy(self)
+    end
   end
 
+  def to_unsafe
+    @handle
+  end
+end
+
+class Mongo::ClientPool
+  @handle : LibMongoC::ClientPool
+  def initialize(@handle : LibMongoC::ClientPool)
+    raise "invalid handle" unless @handle
+    @valid = true
+  end
+  # Creates a new Client using uri expressed as a String or Uri class instance.
+  def initialize(uri : String | Uri = "mongodb://localhost")
+    handle =
+      if uri.is_a?(String)
+        LibMongoC.client_pool_new(Mongo::Uri.new(uri))
+      else
+        LibMongoC.client_pool_new(uri)
+      end
+    initialize handle
+  end
+  def pop
+    Client.new(LibMongoC.client_pool_pop(self),true)
+  end
+  def push(client : Client)
+    LibMongoC.client_pool_push(self,client)
+  end
+  def try_pop
+    handle = LibMongoC.client_pool_try_pop(self)
+    if handle
+        Client.new(handle,true)
+    else
+        nil
+    end
+  end
+  def max_size=(size : UInt32)
+    LibMongoC.client_pool_max_size(self,size)
+  end
+  def min_size=(size : UInt32)
+    LibMongoC.client_pool_min_size(self,size)
+  end
+  def invalidate
+    @valid = false
+    LibMongoC.client_pool_destroy(@handle)
+  end
+  def finalize
+    LibMongoC.client_pool_destroy(self) if @valid
+  end
   def to_unsafe
     @handle
   end

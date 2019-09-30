@@ -11,7 +11,7 @@ class Mongo::Database
   end
 
   def finalize
-    LibMongoC.database_destroy(self)
+    LibMongoC.database_destroy(@handle)
   end
 
   # Fetches the name of the database.
@@ -71,7 +71,9 @@ class Mongo::Database
     unless LibMongoC.database_command_simple(self, command.to_bson, prefs, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    repl = BSON.copy_from pointerof(reply)
+    LibBSON.bson_destroy(pointerof(reply))
+    repl
   end
 
   # This method attempts to drop a database on the MongoDB server.

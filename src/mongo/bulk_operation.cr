@@ -6,10 +6,16 @@ class Mongo::BulkOperation
   def initialize(@handle : LibMongoC::BulkOperation)
     raise "invalid handle" unless @handle
     @executed = false
+    @valid = true
+  end
+
+  def invalidate
+    @valid = false
+    LibMongoC.bulk_operation_destroy(@handle)
   end
 
   def finalize
-    LibMongoC.bulk_operation_destroy(@handle)
+    LibMongoC.bulk_operation_destroy(@handle) if @valid
   end
 
   # Queue an insert of a single document into a bulk operation. The insert is
@@ -65,7 +71,9 @@ class Mongo::BulkOperation
     if hint == 0
       raise BSON::BSONError.new(pointerof(error))
     end
-    BSON.copy_from pointerof(reply)
+    results = BSON.copy_from pointerof(reply)
+	LibBSON.bson_destroy(pointerof(reply))
+	results
   end
 
   def to_unsafe

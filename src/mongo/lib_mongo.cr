@@ -13,7 +13,9 @@ lib LibMongoC
   end
 
   fun log_set_handler = mongoc_log_set_handler((LogLevel, UInt8*, UInt8*, Void*) ->, Void*)
-
+  fun mongo_init = mongoc_init (Void*)
+  fun mongo_cleanup = mongoc_cleanup (Void*)  
+  
   alias BSON = LibBSON::BSON
   alias BSONError = LibBSON::BSONError
 
@@ -146,7 +148,9 @@ lib LibMongoC
     language_override: UInt8*
     geo_options: Void* # FIXME
     storage_options: Void* #FIXME
-    padding: Void*[6]
+    partial_filter_expression: BSON
+    collation: BSON
+    padding: Void*[4]
   end
 
   fun index_opt_get_default = mongoc_index_opt_get_default(): IndexOpt*
@@ -362,4 +366,18 @@ lib LibMongoC
   fun client_set_read_prefs = mongoc_client_set_read_prefs(client: Client, prefs: ReadPrefs)
   # fun client_set_ssl_opts = mongoc_client_set_ssl_opts(client: Client, opts: SSLOpt)
   fun client_get_gridfs = mongoc_client_get_gridfs(client: Client, db: UInt8*, prefix: UInt8*, error: BSONError*) : GridFS
+  
+  type ClientPool = Void*
+  fun client_pool_new = mongoc_client_pool_new(uri: Uri) : ClientPool
+  fun client_pool_destroy = mongoc_client_pool_destroy (pool: ClientPool)
+  fun client_pool_pop = mongoc_client_pool_pop (pool: ClientPool) : Client
+  fun client_pool_push = mongoc_client_pool_push (pool: ClientPool, client : Client)
+  fun client_pool_try_pop = mongoc_client_pool_try_pop (pool: ClientPool) : Client
+  fun client_pool_max_size = mongoc_client_pool_max_size (pool: ClientPool,max_pool_size: UInt32)
+  fun client_pool_min_size = mongoc_client_pool_min_size (pool: ClientPool,min_pool_size: UInt32)
+  #fun client_pool_set_ssl_opts = mongoc_client_pool_set_ssl_opts (pool : ClientPool,opts: SSLOpt)
+  fun client_pool_set_error_api = mongoc_client_pool_set_error_api (pool: ClientPool, version: Int32) : Bool
+  fun client_pool_set_appname = mongoc_client_pool_set_appname (pool: ClientPool,appname: UInt8*) : Bool
+  
+  
 end
