@@ -193,6 +193,7 @@ class Mongo::ClientPool
   @handle : LibMongoC::ClientPool
   def initialize(@handle : LibMongoC::ClientPool)
     raise "invalid handle" unless @handle
+    @valid = true
   end
   # Creates a new Client using uri expressed as a String or Uri class instance.
   def initialize(uri : String | Uri = "mongodb://localhost")
@@ -224,8 +225,12 @@ class Mongo::ClientPool
   def min_size=(size : UInt32)
     LibMongoC.client_pool_min_size(self,size)
   end
+  def invalidate
+    @valid = false
+    LibMongoC.client_pool_destroy(@handle)
+  end
   def finalize
-    LibMongoC.client_pool_destroy(self)
+    LibMongoC.client_pool_destroy(self) if @valid
   end
   def to_unsafe
     @handle
