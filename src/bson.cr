@@ -210,11 +210,11 @@ class BSON
   end
 
   def append_document(key)
-    child_handle = LibBSON.bson_new()
-    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, child_handle)
+    child_handle = LibBSON::BSONHandle.new
+    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, pointerof(child_handle))
       return false
     end
-    child = BSON.new(child_handle)
+    child = BSON.new(pointerof(child_handle))
     begin
       yield child
     ensure
