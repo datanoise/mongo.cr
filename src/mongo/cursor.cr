@@ -2,6 +2,7 @@ require "./lib_mongo"
 require "./host"
 
 class Mongo::Cursor
+  @closed : Bool = true
   def initialize(@handle : LibMongoC::Cursor)
     unless @handle
       raise "Unable to initialize Cursor"

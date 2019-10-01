@@ -4,7 +4,7 @@ require "./bson/*"
 
 class BSON
   @handle : LibBSON::BSON
-
+  @valid : Bool = false
   include Enumerable(Value)
   include Comparable(BSON)
 

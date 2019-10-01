@@ -191,6 +191,7 @@ end
 
 class Mongo::ClientPool
   @handle : LibMongoC::ClientPool
+  @valid : Bool = false
   def initialize(@handle : LibMongoC::ClientPool)
     raise "invalid handle" unless @handle
     @valid = true

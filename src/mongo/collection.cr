@@ -6,7 +6,7 @@ class Mongo::Collection
   @database : Mongo::Database?
   @handle : LibMongoC::Collection
   @owned : Bool
-  @valid : Bool
+  @valid : Bool = false
   getter database
 
   def initialize(@database, @handle : LibMongoC::Collection, @owned = true)
