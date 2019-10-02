@@ -8,14 +8,12 @@ class BSON
   include Enumerable(Value)
   include Comparable(BSON)
 
-  def initialize(@handle : LibBSON::BSON)
-    @valid = true
+  def initialize(@handle : LibBSON::BSON, @valid : Bool = true)
     raise "invalid handle" unless @handle
   end
 
   def initialize
     initialize LibBSON.bson_new
-    @valid = true
   end
 
   def finalize
@@ -32,7 +30,7 @@ class BSON
 
   def self.not_initialized
     ptr = Pointer(LibBSON::BSONHandle).malloc(1)
-    new(ptr)
+    new(ptr,false)
   end
 
   def self.from_data(data : Slice(UInt8))
@@ -43,10 +41,6 @@ class BSON
   def self.copy_from(data : LibBSON::BSON)
     handle = LibBSON.bson_copy(data)
     new(handle)
-  end
-
-  def freed
-    @valid = false
   end
 
   def invalidate
@@ -228,7 +222,6 @@ class BSON
       yield child_handle
     ensure
       LibBSON.bson_append_document_end(handle, child_handle)
-      child_handle.freed
     end
   end
 
