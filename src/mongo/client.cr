@@ -180,7 +180,7 @@ class Mongo::Client
 
   def finalize
     if !@pooled
-        LibMongoC.client_destroy(self)
+        LibMongoC.client_destroy(@handle)
     end
   end
 

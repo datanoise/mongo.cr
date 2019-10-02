@@ -48,7 +48,7 @@ class BSON
       t = LibBSON.bson_oid_get_time_t(@handle)
       ts = LibC::Timespec.new
       ts.tv_sec = t
-      Time.new(ts, Time::Kind::Utc)
+      Time.new(ts, Time::Location::UTC)
     end
   end
 end
