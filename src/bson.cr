@@ -8,9 +8,9 @@ class BSON
   include Enumerable(Value)
   include Comparable(BSON)
 
-  def initialize(@handle : LibBSON::BSON, keep : Bool = true)
+  def initialize(@handle : LibBSON::BSON)
+    @valid = true
     raise "invalid handle" unless @handle
-    @valid = keep
   end
 
   def initialize
@@ -210,16 +210,15 @@ class BSON
   end
 
   def append_document(key)
-    child_handle = LibBSON.bson_new()
-    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize,child_handle)
+    child_handle = LibBSON::BSONHandle.new
+    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, pointerof(child_handle))
       return false
     end
-    child = BSON.new(child_handle,false)
+    child = BSON.new(pointerof(child_handle))
     begin
       yield child
     ensure
       LibBSON.bson_append_document_end(handle, child)
-      LibBSON.bson_free(child_handle) # we used new, we must FREE it not destroy it to prevent memory leak
       child.invalidate
     end
   end
