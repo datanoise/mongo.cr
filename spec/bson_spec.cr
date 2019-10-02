@@ -343,6 +343,13 @@ describe BSON do
     bson.to_s.should eq s
   end
 
+  it "should be able to read binary data" do
+    bson = BSON.new
+    bson["bin"] = BSON::Binary.new(BSON::Binary::SubType::Binary, "binary".to_slice)
+    value = bson["bin"].as(BSON::Binary)
+    String.new(value.data).should eq("binary")
+  end
+
   it "should error json" do
     s = "{ this = wrong }"
     expect_raises(Exception) do
