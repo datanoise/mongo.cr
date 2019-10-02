@@ -15,6 +15,7 @@ class BSON
 
   def initialize
     initialize LibBSON.bson_new
+    @valid = true
   end
 
   def finalize
@@ -29,6 +30,11 @@ class BSON
     new(handle)
   end
 
+  def self.not_initialized
+    ptr = Pointer(LibBSON::BSONHandle).malloc(1)
+    new(ptr)
+  end
+
   def self.from_data(data : Slice(UInt8))
     handle = LibBSON.bson_new_from_data(data, data.size)
     new(handle)
@@ -39,8 +45,12 @@ class BSON
     new(handle)
   end
 
-  def invalidate
+  def freed
     @valid = false
+  end
+
+  def invalidate
+    return if !@valid
     LibBSON.bson_destroy(@handle)
   end
 
@@ -210,16 +220,15 @@ class BSON
   end
 
   def append_document(key)
-    child_handle = LibBSON::BSONHandle.new
-    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, pointerof(child_handle))
+    child_handle = BSON.not_initialized
+    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, child_handle)
       return false
     end
-    child = BSON.new(pointerof(child_handle))
     begin
-      yield child
+      yield child_handle
     ensure
-      LibBSON.bson_append_document_end(handle, child)
-      child.invalidate
+      LibBSON.bson_append_document_end(handle, child_handle)
+      child_handle.freed
     end
   end
 

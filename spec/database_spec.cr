@@ -22,15 +22,14 @@ describe Mongo::Database do
     col.should_not be_nil
 
     db.collection_names.includes?("my_col").should be_true
-
-    db.drop
+    db["my_col"].drop
   end
 
   it "should be able to manage users" do
+    fail "Current test service and client do not use TLS and the driver warns not to add user without tls"
     #client = Mongo::Client.new(DB_STRING)
     #db = client["core_test"]
     #db.add_user("new_user", "new_pass")
-    #db["my_col"].insert(BSON.new)
     #user = db.users.not_nil!["0"]
     #if user.is_a?(BSON)
     #  user["user"].should eq("new_user")

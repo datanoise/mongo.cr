@@ -21,8 +21,8 @@ class Mongo::Collection
 
   def invalidate
     @valid = false
+    LibMongoC.collection_destroy(@handle) if @owned
     @owned = false
-    LibMongoC.collection_destroy(@handle)
   end
 
   def finalize
