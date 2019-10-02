@@ -5,11 +5,13 @@ require "./bson/*"
 class BSON
   @handle : LibBSON::BSON
   @valid : Bool = false
+  @owned : Bool = true
   include Enumerable(Value)
   include Comparable(BSON)
 
-  def initialize(@handle : LibBSON::BSON, @valid : Bool = true)
+  def initialize(@handle : LibBSON::BSON, @owned : Bool = true)
     raise "invalid handle" unless @handle
+    @valid = true
   end
 
   def initialize
@@ -17,7 +19,7 @@ class BSON
   end
 
   def finalize
-    LibBSON.bson_destroy(@handle) if @valid
+    LibBSON.bson_destroy(@handle) if @valid && @owned
   end
 
   def self.from_json(json)
@@ -44,8 +46,8 @@ class BSON
   end
 
   def invalidate
-    return if !@valid
-    LibBSON.bson_destroy(@handle)
+    LibBSON.bson_destroy(@handle) if @owned && @valid
+    @valid = false
   end
 
   protected def handle
