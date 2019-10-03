@@ -20,6 +20,7 @@ class Mongo::Cursor
   def close
     return if @closed
     LibMongoC.cursor_destroy(self)
+    @data.clear(1)
     @closed = true
   end
 

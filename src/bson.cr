@@ -20,6 +20,7 @@ class BSON
 
   def finalize
     LibBSON.bson_destroy(@handle) if @valid && @owned
+    @handle.clear(1) if !@owned
   end
 
   def self.from_json(json)
@@ -47,6 +48,8 @@ class BSON
 
   def invalidate
     LibBSON.bson_destroy(@handle) if @owned && @valid
+    @handle.clear(1) if !@owned
+    @owned = false
     @valid = false
   end
 
@@ -224,6 +227,7 @@ class BSON
       yield child_handle
     ensure
       LibBSON.bson_append_document_end(handle, child_handle)
+      child_handle.invalidate
     end
   end
 
