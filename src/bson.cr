@@ -20,7 +20,7 @@ class BSON
 
   def finalize
     LibBSON.bson_destroy(@handle) if @valid && @owned
-    @handle.clear(1) if !@owned
+    @handle.clear(1) if !@owned && @valid
   end
 
   def self.from_json(json)
