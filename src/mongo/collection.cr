@@ -29,6 +29,10 @@ class Mongo::Collection
     LibMongoC.collection_destroy(@handle) if @owned && @valid
   end
 
+  def watch(pipeline = BSON.new, options = BSON.new)
+    ChangeStream.new LibMongoC.collection_watch(self,pipeline.to_bson, options.to_bson)
+  end
+
   # This method shall execute an aggregation query on the underlying 'Collection'
   def aggregate(pipeline, flags = LibMongoC::QueryFlags::NONE, options = BSON.new, prefs = nil)
     Cursor.new LibMongoC.collection_aggregate(self, flags, pipeline.to_bson, options, prefs)

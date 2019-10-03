@@ -25,6 +25,10 @@ class Mongo::Client
     initialize handle
   end
 
+  def watch(pipeline = BSON.new, options = BSON.new)
+    ChangeStream.new LibMongoC.client_watch(self,pipeline.to_bson, options.to_bson)
+  end
+
   # Use this method to set up the crystal implementation of underlying stream API.
   # This is useful to make mongo client's IO operations to play nicely with Fiber API.
   def setup_stream

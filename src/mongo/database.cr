@@ -14,6 +14,10 @@ class Mongo::Database
     LibMongoC.database_destroy(@handle)
   end
 
+  def watch(pipeline = BSON.new, options = BSON.new)
+    ChangeStream.new LibMongoC.database_watch(self,pipeline.to_bson, options.to_bson)
+  end
+
   # Fetches the name of the database.
   def name
     String.new LibMongoC.database_get_name(self)
