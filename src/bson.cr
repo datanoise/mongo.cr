@@ -20,7 +20,6 @@ class BSON
 
   def finalize
     LibBSON.bson_destroy(@handle) if @valid && @owned
-    #@handle.clear(1) if !@owned && @valid
   end
 
   def self.from_json(json)
@@ -28,7 +27,7 @@ class BSON
     if handle.null? && error
       raise BSONError.new(pointerof(error))
     end
-    new(handle)
+    new(handle,true)
   end
 
   def self.not_initialized
@@ -48,7 +47,6 @@ class BSON
 
   def invalidate
     LibBSON.bson_destroy(@handle) if @owned && @valid
-    #@handle.clear(1) if !@owned
     @owned = false
     @valid = false
   end
@@ -64,6 +62,11 @@ class BSON
 
   def empty?
     count == 0
+  end
+
+  def to_json(json : JSON::Builder)
+    l = to_json
+    json.raw l
   end
 
   def to_json
@@ -214,21 +217,19 @@ class BSON
       else
         ""
       end
-
     LibBSON.bson_append_regex(handle, key, key.bytesize, value.source, options)
   end
 
   def append_document(key)
-    LibBSON.bson_init(out child_handle)
-    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, pointerof(child_handle))
+    child_handle = LibBSON.bson_new()
+    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, child_handle)
       return false
     end
-    child = BSON.new pointerof(child_handle),false
+    child = BSON.new child_handle
     begin
       yield child
     ensure
       LibBSON.bson_append_document_end(handle, child)
-      LibBSON.bson_destroy(pointerof(child_handle))
       child.invalidate
     end
   end

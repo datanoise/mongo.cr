@@ -28,6 +28,12 @@ class BSON
       String.new(buf.to_slice)
     end
 
+    def to_json(json : JSON::Builder)
+      json.object do
+          json.field("$oid",to_s)
+      end
+    end
+
     def ==(other : ObjectId)
       LibBSON.bson_oid_equal(@handle, other)
     end

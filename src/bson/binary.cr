@@ -14,6 +14,10 @@ class BSON
     def initialize(@subtype : SubType, @data : Slice(UInt8))
     end
 
+    def to_json(json : JSON::Builder)
+      json.string "<BINARY>"
+    end
+
     def to_raw_type
       case @subtype
       when SubType::Binary

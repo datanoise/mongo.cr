@@ -14,6 +14,17 @@ class BSON
       initialize(handle)
     end
 
+    def to_json(json : JSON::Builder)
+        json.object do
+            json.field("$timestamp") do
+                json.object do
+                    json.field "t", timestamp
+                    json.field "i", increment
+                end
+            end
+        end
+    end
+
     def timestamp
       @handle.ts
     end
