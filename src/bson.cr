@@ -20,7 +20,7 @@ class BSON
 
   def finalize
     LibBSON.bson_destroy(@handle) if @valid && @owned
-    @handle.clear(1) if !@owned && @valid
+    #@handle.clear(1) if !@owned && @valid
   end
 
   def self.from_json(json)
@@ -48,7 +48,7 @@ class BSON
 
   def invalidate
     LibBSON.bson_destroy(@handle) if @owned && @valid
-    @handle.clear(1) if !@owned
+    #@handle.clear(1) if !@owned
     @owned = false
     @valid = false
   end
@@ -219,15 +219,17 @@ class BSON
   end
 
   def append_document(key)
-    child_handle = BSON.not_initialized
-    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, child_handle)
+    LibBSON.bson_init(out child_handle)
+    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, pointerof(child_handle))
       return false
     end
+    child = BSON.new pointerof(child_handle),false
     begin
-      yield child_handle
+      yield child
     ensure
-      LibBSON.bson_append_document_end(handle, child_handle)
-      child_handle.invalidate
+      LibBSON.bson_append_document_end(handle, child)
+      LibBSON.bson_destroy(pointerof(child_handle))
+      child.invalidate
     end
   end
 
