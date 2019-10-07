@@ -13,6 +13,14 @@ class Regex
     end
 end
 
+class Time
+  def to_json(json : JSON::Builder)
+    json.object do
+        json.field("$date",Time::Format::ISO_8601_DATE_TIME.format(self))
+    end
+  end
+end
+
 class BSON
   alias ValueType = BSON | Binary | Code | MaxKey | MinKey | ObjectId | Symbol | Timestamp | Bool | Float64 | Int32 | Int64 | Regex | String | Time | Nil
   class Value
