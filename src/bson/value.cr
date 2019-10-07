@@ -13,7 +13,7 @@ class Regex
     end
 end
 
-class Time
+struct Time
   def to_json(json : JSON::Builder)
     json.object do
         json.field("$date",Time::Format::ISO_8601_DATE_TIME.format(self))
