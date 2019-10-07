@@ -224,13 +224,14 @@ lib LibBSON
   fun bson_context_get_default = bson_context_get_default() : BSONContext
 
   fun bson_new = bson_new() : BSON
+  fun bson_init = bson_init(bson: BSON)
   fun bson_new_from_json = bson_new_from_json(data: UInt8*, len: Int32, error: BSONError*) : BSON
   fun bson_init_from_json = bson_init_from_json(bson: BSON, data: UInt8*, len: Int32, error: BSONError*) : Bool
   fun bson_new_from_data = bson_new_from_data(data: UInt8*, length: Int32) : BSON
   fun bson_destroy = bson_destroy(bson: BSON)
   fun bson_get_data = bson_get_data(bson: BSON) : UInt8*
   fun bson_count_keys = bson_count_keys(bson: BSON) : UInt32
-  fun bson_as_json = bson_as_json(bson: BSON, length: Int32*) : UInt8*
+  fun bson_as_json = bson_as_canonical_extended_json(bson: BSON, length: Int32*) : UInt8*
   fun bson_has_field = bson_has_field(bson: BSON, key: UInt8*) : Bool
   fun bson_equal = bson_equal(bson: BSON, other: BSON) : Bool
   fun bson_compare = bson_compare(bson: BSON, other: BSON) : Int32

@@ -1,5 +1,32 @@
 require "./lib_bson"
 
+class Regex
+    def to_json(json : JSON::Builder)
+        json.object do
+            json.field("$regularExpression") do
+                json.object do
+                    json.field "pattern",source
+                    json.field "options",options.to_s
+                end
+            end
+        end
+    end
+end
+
+struct Time
+  def to_json(json : JSON::Builder)
+    json.object do
+        json.field("$date") do
+            json.object do
+                json.field "$numberLong" do
+                    json.string self.to_unix_ms
+                end
+            end
+        end
+    end
+  end
+end
+
 class BSON
   alias ValueType = BSON | Binary | Code | MaxKey | MinKey | ObjectId | Symbol | Timestamp | Bool | Float64 | Int32 | Int64 | Regex | String | Time | Nil
   class Value

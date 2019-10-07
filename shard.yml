@@ -1,5 +1,5 @@
 name: mongo
-version: 0.1.3
+version: 0.1.4
 
 authors:
   - Jerome Gravel-Niquet <jeromegn@gmail.com>
@@ -7,7 +7,15 @@ authors:
 description: |
   Bindings for MongoDB C Driver.
 
+contributors:
+  - Benjamin De la cruz <chomi.numb.94@gmail.com>
+  - Sam Johnson <sam@durosoft.com>
+  - drum445 <humdrum375@gmail.com>
+  - Zino Ukoko <zinocu@aol.com>
+  - Sal Scotto <sal.scotto@gmail.com>
+
 libraries:
   libmongoc: 1.1.15
 
 license: MIT
+crystal: 0.30.1

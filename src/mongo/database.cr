@@ -14,6 +14,10 @@ class Mongo::Database
     LibMongoC.database_destroy(@handle)
   end
 
+  def watch(pipeline = BSON.new, options = BSON.new)
+    ChangeStream.new LibMongoC.database_watch(self,pipeline.to_bson, options.to_bson)
+  end
+
   # Fetches the name of the database.
   def name
     String.new LibMongoC.database_get_name(self)
@@ -35,7 +39,7 @@ class Mongo::Database
 
   # This method shall create a new user with access to database.
   def add_user(username, password, roles = nil, custom_data = nil)
-    unless LibMongoC.database_add_user(self, username, password, roles.to_bson, custom_data.to_bson, out error)
+    unless LibMongoC.database_add_user(@handle, username, password, roles.to_bson, custom_data.to_bson, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
   end
@@ -45,6 +49,7 @@ class Mongo::Database
     cmd = BSON.new
     cmd["usersInfo"] = 1
     res = command_simple(cmd)
+    puts res.inspect
     if res && (users = res["users"]) && users.is_a?(BSON)
       users
     end

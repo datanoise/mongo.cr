@@ -156,6 +156,14 @@ lib LibMongoC
   fun index_opt_get_default = mongoc_index_opt_get_default(): IndexOpt*
   fun index_opt_init = mongoc_index_opt_init(opt: IndexOpt*)
 
+  type ChangeStream = Void*
+
+  fun change_stream_destroy = mongoc_change_stream_destroy(stream: ChangeStream)
+  fun change_stream_get_resume_token = mongoc_change_stream_get_resume_token(stream: ChangeStream) : BSON
+  fun change_stream_next = mongoc_change_stream_next(stream: ChangeStream, bson: BSON*) : Bool
+  fun change_stream_error_document = mongoc_change_stream_error_document(stream: ChangeStream, error: BSONError, bson: BSON* ) : Bool
+
+
   type BulkOperation = Void*
 
   fun bulk_operation_destroy = mongoc_bulk_operation_destroy(bulk: BulkOperation)
@@ -173,6 +181,7 @@ lib LibMongoC
 
   type Collection = Void*
 
+  fun collection_watch = mongoc_collection_watch(collection: Collection, pipeline: BSON, options: BSON) : ChangeStream
   fun collection_aggregate = mongoc_collection_aggregate(collection: Collection, flags: QueryFlags,
                                                          pipeline: BSON, options: BSON,
                                                          prefs: ReadPrefs) : Cursor
@@ -234,8 +243,12 @@ lib LibMongoC
   fun collection_validate = mongoc_collection_validate(collection: Collection, options: BSON, reply: BSON,
                                                        error: BSONError*) : Bool
 
+
+
+
   type Database = Void*
 
+  fun database_watch = mongoc_database_watch(db: Database, pipeline: BSON, options: BSON) : ChangeStream
   fun database_get_name = mongoc_database_get_name(db: Database) : UInt8*
   fun database_remove_user = mongoc_database_remove_user(db: Database, username: UInt8*, error: BSONError*) : Bool
   fun database_remove_all_users = mongoc_database_remove_all_users(db: Database, error: BSONError*) : Bool
@@ -341,6 +354,7 @@ lib LibMongoC
 
   type Client = Void*
 
+  fun client_watch = mongoc_client_watch(client: Client, pipeline: BSON, options: BSON) : ChangeStream
   fun client_new = mongoc_client_new(uri_string: UInt8*) : Client
   fun client_set_stream_initiator = mongoc_client_set_stream_initiator(client: Client, initiator: StreamInitiator, user_data: Void*)
   fun client_new_from_uri = mongoc_client_new_from_uri(uri: Uri) : Client

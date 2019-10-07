@@ -6,7 +6,7 @@ class Mongo::Collection
   @database : Mongo::Database?
   @handle : LibMongoC::Collection
   @owned : Bool
-  @valid : Bool
+  @valid : Bool = false
   getter database
 
   def initialize(@database, @handle : LibMongoC::Collection, @owned = true)
@@ -21,11 +21,16 @@ class Mongo::Collection
 
   def invalidate
     @valid = false
-    LibMongoC.collection_destroy(@handle)
+    LibMongoC.collection_destroy(@handle) if @owned
+    @owned = false
   end
 
   def finalize
     LibMongoC.collection_destroy(@handle) if @owned && @valid
+  end
+
+  def watch(pipeline = BSON.new, options = BSON.new)
+    ChangeStream.new LibMongoC.collection_watch(self,pipeline.to_bson, options.to_bson)
   end
 
   # This method shall execute an aggregation query on the underlying 'Collection'
