@@ -1,3 +1,4 @@
+require "base64"
 class BSON
   struct Binary
     enum SubType
@@ -15,7 +16,23 @@ class BSON
     end
 
     def to_json(json : JSON::Builder)
-      json.string "<BINARY>"
+        json.object do
+            json.field("$binary") do
+                json.object do
+                    json.field "base64" do
+                        json.string Base64.encode(@data)
+                    end
+                    json.field "subtype",@subtype
+                end
+            end
+        end
+          # { "$binary":
+                  #   {
+                  #      "base64": "<payload>",
+                  #      "subtype": "<t>"
+                  #   }
+                  #}
+          #
     end
 
     def to_raw_type
