@@ -16,7 +16,11 @@ end
 struct Time
   def to_json(json : JSON::Builder)
     json.object do
-        json.field("$date",Time::Format::ISO_8601_DATE_TIME.format(self))
+        json.field("$date") do
+            json.object do
+                json.field "$numberLong", self.to_unix_ms
+            end
+        end
     end
   end
 end
