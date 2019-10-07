@@ -19,7 +19,7 @@ struct Time
         json.field("$date") do
             json.object do
                 json.field "$numberLong" do
-                    json.number self.to_unix_ms
+                    json.string self.to_unix_ms
                 end
             end
         end
