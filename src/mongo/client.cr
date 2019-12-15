@@ -9,7 +9,7 @@ require "./lib_mongo"
 class Mongo::Client
   @handle : LibMongoC::Client
   property pooled : Bool = false
-  
+
   def initialize(@handle : LibMongoC::Client,@pooled : Bool = false)
     raise "invalid handle" unless @handle
   end
@@ -178,11 +178,12 @@ class Mongo::Client
     LibMongoC.client_set_read_prefs(self, value)
   end
 
-  def finalize
-    if !@pooled
-        LibMongoC.client_destroy(self)
-    end
-  end
+  # Commenting prevents freeing bson pointers twice and crashing the program.
+  # def finalize
+  #   if !@pooled
+  #       LibMongoC.client_destroy(self)
+  #   end
+  # end
 
   def to_unsafe
     @handle
