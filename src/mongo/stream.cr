@@ -1,10 +1,11 @@
 require "socket"
 
+# http://mongoc.org/libmongoc/current/mongoc_client_t.html#streams
 module Mongo::Stream
-  @@registry = {} of LibMongoC::Stream* => IO
+  @@registry = {} of LibMongoC::Stream* => Socket
 
   def self.initiator(uri : LibMongoC::Uri, host : LibMongoC::HostList, user_data : Void*, error : LibBSON::BSONError*)
-    socket = TCPSocket.new(String.new(host.value.host.buffer), host.value.port)
+    socket = TCPSocket.new(String.new(host.value.host.to_slice), host.value.port)
 
     stream = LibC.malloc(sizeof(LibMongoC::Stream).to_u32).as(LibMongoC::Stream*)
 
@@ -25,21 +26,23 @@ module Mongo::Stream
     }
     stream.value.writev = -> (stream : LibMongoC::Stream*, iov : LibMongoC::IOVec*, iovcnt : LibC::SizeT, timeout_msec : Int32) {
       io = Stream.get_io(stream)
-      count = 0
+      count = 0_i64
       iovcnt.times do
-        len = io.write(Slice.new(iov.value.ion_base, iov.value.ion_len.to_i32))
-        if len != iov.value.ion_len
+        slice = Slice.new(iov.value.ion_base, iov.value.ion_len.to_i32)
+        len = slice.bytesize
+        io.write(slice)
+        if len != iov.value.ion_len && len
           count += len
           break
         end
-        count += len
+        count += len ? len : 0
         iov += 1
       end
       LibC::SSizeT.cast(count)
     }
     stream.value.readv = -> (stream : LibMongoC::Stream*, iov : LibMongoC::IOVec*, iovcnt : LibC::SizeT, min_bytes : LibC::SizeT, timeout : Int32) {
       io = Stream.get_io(stream)
-      count = 0
+      count = 0_i64
       begin
         iovcnt.times do
           len = iov.value.ion_len.to_i32
@@ -55,12 +58,18 @@ module Mongo::Stream
       io = Stream.get_io(stream)
       LibC.setsockopt(io.fd, level, optname, optval, optlen)
     }
-    stream.value.get_base_stream = -> (stream : LibMongoC::Stream*) {
-      Pointer(LibMongoC::Stream).null
-    }
+    stream.value.get_base_stream = Pointer(Void).null
     stream.value.check_closed = -> (stream : LibMongoC::Stream*) {
       io = Stream.get_io(stream)
       io.closed? ? true : false
+    }
+    stream.value.poll = ->(stream_poll_array: LibMongoC::StreamPoll*, nstreams: Int32, timeout_msec: Int32) {
+      (0...nstreams).each do |index|
+        stream_poll = stream_poll_array[index]
+        stream_poll.revents = stream_poll.events
+        stream_poll_array[index] = stream_poll
+      end
+      nstreams
     }
 
     @@registry[stream] = socket

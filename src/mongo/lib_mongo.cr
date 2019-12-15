@@ -14,8 +14,8 @@ lib LibMongoC
 
   fun log_set_handler = mongoc_log_set_handler((LogLevel, UInt8*, UInt8*, Void*) ->, Void*)
   fun mongo_init = mongoc_init (Void*)
-  fun mongo_cleanup = mongoc_cleanup (Void*)  
-  
+  fun mongo_cleanup = mongoc_cleanup (Void*)
+
   alias BSON = LibBSON::BSON
   alias BSONError = LibBSON::BSONError
 
@@ -270,6 +270,12 @@ lib LibMongoC
     end
   {% end %}
 
+  struct StreamPoll
+    stream: Stream*
+    events: Int32
+    revents: Int32
+  end
+
   struct Stream
     type: Int32
     destroy: (Stream*) ->
@@ -278,8 +284,12 @@ lib LibMongoC
     writev: (Stream*, IOVec*, LibC::SizeT, Int32) -> LibC::SSizeT
     readv: (Stream*, IOVec*, LibC::SizeT, LibC::SizeT, Int32) -> LibC::SSizeT
     setsockopt: (Stream*, Int32, Int32, Void*, Int32) -> Int32
-    get_base_stream: (Stream*) -> Stream*
+    get_base_stream: Pointer(Void) #(Stream*) -> Stream*
     check_closed: (Stream*) -> Bool
+    poll: (StreamPoll*, Int32, Int32) -> LibC::Int
+    failed: Stream* -> Void
+    timed_out: Stream* -> Bool
+    should_retry: Stream* -> Bool
     padding: Void*[7]
   end
 
@@ -366,7 +376,7 @@ lib LibMongoC
   fun client_set_read_prefs = mongoc_client_set_read_prefs(client: Client, prefs: ReadPrefs)
   # fun client_set_ssl_opts = mongoc_client_set_ssl_opts(client: Client, opts: SSLOpt)
   fun client_get_gridfs = mongoc_client_get_gridfs(client: Client, db: UInt8*, prefix: UInt8*, error: BSONError*) : GridFS
-  
+
   type ClientPool = Void*
   fun client_pool_new = mongoc_client_pool_new(uri: Uri) : ClientPool
   fun client_pool_destroy = mongoc_client_pool_destroy (pool: ClientPool)
@@ -378,6 +388,6 @@ lib LibMongoC
   #fun client_pool_set_ssl_opts = mongoc_client_pool_set_ssl_opts (pool : ClientPool,opts: SSLOpt)
   fun client_pool_set_error_api = mongoc_client_pool_set_error_api (pool: ClientPool, version: Int32) : Bool
   fun client_pool_set_appname = mongoc_client_pool_set_appname (pool: ClientPool,appname: UInt8*) : Bool
-  
-  
+
+
 end

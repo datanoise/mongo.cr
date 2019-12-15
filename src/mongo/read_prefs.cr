@@ -7,9 +7,10 @@ class Mongo::ReadPrefs
     initialize LibMongoC.read_prefs_new(mode)
   end
 
-  def finalize
-    LibMongoC.read_prefs_destroy(self)
-  end
+  # Commenting prevents freeing bson pointers twice and crashing the program.
+  # def finalize
+  #   LibMongoC.read_prefs_destroy(self)
+  # end
 
   def clone
     ReadPrefs.new LibMongoC.read_prefs_copy(self)

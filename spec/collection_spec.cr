@@ -25,9 +25,9 @@ describe Mongo::Collection do
   it "should be able to drop a collection" do
     with_collection do |col|
       col.insert({"name" => "Bob"})
-      col.database.collection_names.includes?(col.name).should be_true
+      col.database.try &.collection_names.includes?(col.name).should be_true
       col.drop
-      col.database.collection_names.includes?(col.name).should be_false
+      col.database.try &.collection_names.includes?(col.name).should be_false
     end
   end
 
@@ -142,7 +142,7 @@ describe Mongo::Collection do
   it "should be able to rename a collection" do
     with_collection do |col|
       col.insert({"name" => "Bob"})
-      col.rename(col.database.name, "new_name")
+      col.rename(col.database.try &.name || "", "new_name")
       col.name.should eq("new_name")
     end
   end

@@ -136,7 +136,7 @@ class Mongo::GridFS::File < IO
   end
 
   # Performs a gathered write to the underlying gridfs file.
-  def write(slice : Slice(UInt8))
+  def write(slice : Slice(UInt8)) : Nil
     iov = LibMongoC::IOVec.new
     iov.ion_base = slice.to_unsafe
     iov.ion_len = slice.bytesize.to_u64
