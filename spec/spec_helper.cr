@@ -1,10 +1,12 @@
 def create_client
-  Mongo::Client.new("mongodb://localhost")
+  client = Mongo::Client.new("mongodb://localhost")
+  client.setup_stream
+  client
 end
 
 def create_database
   client = create_client
-  client["my_db_#{Time.now.epoch}"]
+  client["my_db_#{Time.utc.to_unix_ms}"]
 end
 
 def create_collection

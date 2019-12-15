@@ -30,7 +30,7 @@ describe BSON::ObjectId do
 
   it "should be able to get a time" do
     oid = BSON::ObjectId.new
-    (oid.time - Time.utc_now).should be < 1.seconds
+    (oid.time - Time.utc).should be < 1.seconds
   end
 
   it "should be able to compare ObjectIds" do
@@ -43,9 +43,9 @@ end
 
 describe BSON::Timestamp do
   it "should be comparable" do
-    t = Time.now
-    t1 = BSON::Timestamp.new(t.epoch_ms, 1)
-    t2 = BSON::Timestamp.new(t.epoch_ms, 2)
+    t = Time.utc
+    t1 = BSON::Timestamp.new(t.to_unix.to_u32, 1)
+    t2 = BSON::Timestamp.new(t.to_unix.to_u32, 2)
     t2.should be > t1
   end
 end
@@ -184,22 +184,22 @@ describe BSON do
   end
 
   it "should be able to append time" do
-    t = Time.now
+    t = Time.utc
     bson = BSON.new
     bson["time"] = t
     bson_t = bson["time"]
     if bson_t.is_a?(Time)
-      bson_t.epoch.should eq(t.to_utc.epoch)
+      bson_t.to_unix.should eq(t.to_utc.to_unix)
     else
       fail "expected Time"
     end
   end
 
   it "should be able to append timestamp" do
-    t = Time.now
+    t = Time.utc
     bson = BSON.new
-    bson["ts"] = BSON::Timestamp.new(t.epoch_ms, 1)
-    bson["ts"].should eq(BSON::Timestamp.new(t.epoch_ms, 1))
+    bson["ts"] = BSON::Timestamp.new(t.to_unix.to_u32, 1)
+    bson["ts"].should eq(BSON::Timestamp.new(t.to_unix.to_u32, 1))
   end
 
   it "should be able to append regex" do
