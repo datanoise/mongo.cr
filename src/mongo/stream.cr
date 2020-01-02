@@ -2,7 +2,7 @@ require "socket"
 
 # http://mongoc.org/libmongoc/current/mongoc_client_t.html#streams
 module Mongo::Stream
-  @@registry = {} of LibMongoC::Stream* => { Socket, String, UInt16 }
+  @@registry = {} of LibMongoC::Stream* => { Socket, String, UInt16, Bool }
 
   def self.initiator(uri : LibMongoC::Uri, host : LibMongoC::HostList, user_data : Void*, error : LibBSON::BSONError*)
     begin
@@ -76,11 +76,6 @@ module Mongo::Stream
         (0...nstreams).each do |index|
           stream_poll = stream_poll_array[index]
           io = Stream.get_io(stream_poll.stream)
-          begin
-            io.connect *Stream.get_address(stream_poll.stream)
-          rescue err
-            pp err
-          end
           stream_poll.revents = io.try &.closed? ? 0x08 : stream_poll.events
           stream_poll_array[index] = stream_poll
         end
@@ -101,7 +96,7 @@ module Mongo::Stream
         false
       }
 
-      @@registry[stream] = { socket, String.new(host.value.host.to_slice), host.value.port }
+      @@registry[stream] = { socket, String.new(host.value.host.to_slice), host.value.port, false }
       stream
     rescue
       nil
@@ -109,12 +104,11 @@ module Mongo::Stream
   end
 
   def self.get_io(stream : LibMongoC::Stream*)
-    io, _, _ = @@registry[stream]
+    io, host, port, connected = @@registry[stream]
+    unless connected || !io
+      io.connect host, port
+      @@registry[stream] = {io, host, port, true}
+    end
     io
-  end
-
-  def self.get_address(stream : LibMongoC::Stream*)
-    _, host, port = @@registry[stream]
-    { host, port }
   end
 end
