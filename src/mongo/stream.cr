@@ -105,9 +105,12 @@ module Mongo::Stream
 
   def self.get_io(stream : LibMongoC::Stream*)
     io, host, port, connected = @@registry[stream]
-    unless connected || !io
-      io.connect host, port
-      @@registry[stream] = {io, host, port, true}
+    unless connected
+      begin
+        io.connect host, port
+        @@registry[stream] = {io, host, port, true}
+      rescue
+      end
     end
     io
   end
