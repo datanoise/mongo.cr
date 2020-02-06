@@ -12,6 +12,7 @@ class Mongo::BulkOperation
   def invalidate
     @valid = false
     LibMongoC.bulk_operation_destroy(@handle)
+    self
   end
 
   def finalize
@@ -22,6 +23,7 @@ class Mongo::BulkOperation
   # not performed until `execute` is called.
   def insert(document)
     LibMongoC.bulk_operation_insert(self, document.to_bson)
+    self
   end
 
   # This method queues a delete operation as part of bulk that will delete
@@ -29,6 +31,7 @@ class Mongo::BulkOperation
   # `remove_one`.
   def remove(selector)
     LibMongoC.bulk_operation_remove(self, selector.to_bson)
+    self
   end
 
   # This method queues a delete operation as part of bulk that will delete a
@@ -36,12 +39,14 @@ class Mongo::BulkOperation
   # `remove`.
   def remove_one(selector)
     LibMongoC.bulk_operation_remove_one(self, selector.to_bson)
+    self
   end
 
   # Replace a single document as part of a bulk operation. This only queues the
   # operation. To execute it, call `execute`.
   def replace_one(selector, document, upsert = false)
     LibMongoC.bulk_operation_replace_one(self, selector.to_bson, document.to_bson, upsert)
+    self
   end
 
   # This method queues an update as part of a bulk operation. This does not
@@ -49,6 +54,7 @@ class Mongo::BulkOperation
   # `execute`.
   def update(selector, document, upsert = false)
     LibMongoC.bulk_operation_update(self, selector.to_bson, document.to_bson, upsert)
+    self
   end
 
   # This method queues an update as part of a bulk operation. It will only
@@ -57,6 +63,7 @@ class Mongo::BulkOperation
   # `execute`.
   def update_one(selector, document, upsert = false)
     LibMongoC.bulk_operation_update_one(self, selector.to_bson, document.to_bson, upsert)
+    self
   end
 
   # This method executes all operations queued into the bulk operation. If
