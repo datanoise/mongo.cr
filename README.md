@@ -20,12 +20,20 @@ $ brew install mongo-c
 
 On Linux you need to install `libmongoc-1.1-0` and `libbson-1.1-0` from your package manager or from source:
 
+[http://mongoc.org/libmongoc/current/installing.html](http://mongoc.org/libmongoc/current/installing.html)
+
 ```
 wget https://github.com/mongodb/mongo-c-driver/releases/download/1.1.0/mongo-c-driver-1.1.0.tar.gz
 tar -zxvf mongo-c-driver-1.1.0.tar.gz && cd mongo-c-driver-1.1.0/
 ./configure --prefix=/usr --libdir=/usr/lib64
 make
 sudo make install
+```
+
+On Linux/Ubuntu
+
+```
+  sudo apt install libmongoc-dev libmongoc-1.0-0 libmongoclient-dev
 ```
 
 ## Installation
