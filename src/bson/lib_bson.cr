@@ -70,7 +70,7 @@ lib LibBSON
      MONGOC_ERROR_SERVER,
      MONGOC_ERROR_TRANSACTION,
   end
-	
+
   enum ErrorCode
      MONGOC_ERROR_STREAM_INVALID_TYPE = 1,
      MONGOC_ERROR_STREAM_INVALID_STATE,
@@ -253,6 +253,7 @@ lib LibBSON
   fun bson_append_document = bson_append_document(bson: BSON, key: UInt8*, key_length: Int32, value: BSON) : Bool
   fun bson_append_array_begin = bson_append_array_begin(bson: BSON, key: UInt8*, key_length: Int32, child: BSON) : Bool
   fun bson_append_array_end = bson_append_array_end(bson: BSON, child: BSON) : Bool
+  fun bson_append_array = bson_append_array(bson: BSON, key: UInt8*, key_length: Int32, child: BSON) : Bool
   fun bson_append_symbol = bson_append_symbol(bson: BSON, key: UInt8*, key_length: Int32, value: UInt8*, length: Int32) : Bool
   fun bson_append_date_time = bson_append_date_time(bson: BSON, key: UInt8*, key_length: Int32, value: Int64) : Bool
   fun bson_append_timestamp = bson_append_timestamp(bson: BSON, key: UInt8*, key_length: Int32, ts: UInt32, incr: UInt32) : Bool
