@@ -1,5 +1,5 @@
 require "./uri"
-require "./stream"
+require "./stream/initiator"
 require "./lib_mongo"
 
 # Client class provides access to a MongoDB node, replica-set, or
@@ -28,7 +28,7 @@ class Mongo::Client
   # Use this method to set up the crystal implementation of underlying stream API.
   # This is useful to make mongo client's IO operations to play nicely with Fiber API.
   def setup_stream
-    LibMongoC.client_set_stream_initiator(self, -> Stream.initiator, nil)
+    LibMongoC.client_set_stream_initiator(self, -> Stream::Initiator.initiator, nil)
   end
 
   # Returns a Uri instance used to create Client.
