@@ -26,7 +26,7 @@ describe Mongo::Database do
   end
 
   it "should be able to manage users" do
-    fail "Current test service and client do not use TLS and the driver warns not to add user without tls"
+    #fail "Current test service and client do not use TLS and the driver warns not to add user without tls"
     #client = Mongo::Client.new(DB_STRING)
     #db = client["core_test"]
     #db.add_user("new_user", "new_pass")

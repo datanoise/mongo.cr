@@ -23,6 +23,7 @@ class BSON
   end
 
   def self.from_json(json)
+    puts json.inspect
     handle = LibBSON.bson_new_from_json(json, json.bytesize, out error)
     if handle.null? && error
       raise BSONError.new(pointerof(error))
@@ -222,28 +223,30 @@ class BSON
 
   def append_document(key)
     child_handle = LibBSON.bson_new()
-    unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, child_handle)
-      return false
-    end
+    #unless LibBSON.bson_append_document_begin(handle, key, key.bytesize, child_handle)
+    #  return false
+    #end
     child = BSON.new child_handle
     begin
       yield child
+      LibBSON.bson_append_document(handle, key, key.bytesize, child_handle)
     ensure
-      LibBSON.bson_append_document_end(handle, child)
+      #LibBSON.bson_append_document_end(handle, child)
       child.invalidate
     end
   end
 
   def append_array(key)
     child_handle = LibBSON.bson_new()
-    unless LibBSON.bson_append_array_begin(handle, key, key.bytesize, child_handle)
-      return false
-    end
+    #unless LibBSON.bson_append_array_begin(handle, key, key.bytesize, child_handle)
+    #  return false
+    #end
     child = BSON.new(child_handle)
     begin
       yield ArrayAppender.new(child), child
+      LibBSON.bson_append_array(handle, key, key.bytesize, child_handle)
     ensure
-      LibBSON.bson_append_array_end(handle, child)
+      #LibBSON.bson_append_array_end(handle, child)
       child.invalidate
     end
   end

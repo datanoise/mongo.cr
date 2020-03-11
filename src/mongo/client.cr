@@ -182,11 +182,11 @@ class Mongo::Client
     LibMongoC.client_set_read_prefs(self, value)
   end
 
-  def finalize
-    if !@pooled
-        LibMongoC.client_destroy(@handle)
-    end
-  end
+  #def finalize
+  #  if !@pooled
+  #      LibMongoC.client_destroy(@handle)
+  #  end
+  #end
 
   def to_unsafe
     @handle

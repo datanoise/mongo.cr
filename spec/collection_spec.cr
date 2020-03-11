@@ -18,7 +18,7 @@ describe Mongo::Collection do
       pipeline = [{"$match" => {"status" => "A"}},
                   {"$group" => {"_id" => "$cust_id", "total" => {"$sum" => "$amount"}}}].to_bson
       cur = col.aggregate(pipeline)
-      cur.to_a.to_s.should eq("[{ \"_id\" : \"B212\", \"total\" : 200 }, { \"_id\" : \"A123\", \"total\" : 750 }]")
+      cur.to_a.to_s.should eq("[{ \"_id\" : \"B212\", \"total\" : { \"$numberInt\" : \"200\" } }, { \"_id\" : \"A123\", \"total\" : { \"$numberInt\" : \"750\" } }]")
     end
   end
 
@@ -131,7 +131,6 @@ describe Mongo::Collection do
       obj["val"] = 42
       obj["type"] = "person"
       col.save(obj)
-
       doc = col.find({"name" => "counter"}).next
       fail "expected BSON" unless doc.is_a?(BSON)
       doc["val"].should eq(42)

@@ -1,5 +1,5 @@
 def create_client
-  Mongo::Client.new("mongodb://core:core@ds015740.mlab.com:15740/core_test")
+  Mongo::Client.new("mongodb://core:core@ds015740.mlab.com:15740/core_test?retryWrites=false")
 end
 
 def create_database

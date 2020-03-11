@@ -29,9 +29,10 @@ class BSON
     end
 
     def to_json(json : JSON::Builder)
-      json.object do
-          json.field("$oid",to_s)
-      end
+      json.string to_s
+      #json.object do
+      #    json.field("$oid",to_s)
+      #end
     end
 
     def ==(other : ObjectId)

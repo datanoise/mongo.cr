@@ -7,9 +7,9 @@ class Mongo::WriteConcern
     initialize(LibMongoC.write_concern_new)
   end
 
-  def finalize
-    LibMongoC.write_concern_destroy(self)
-  end
+  #def finalize
+  #  LibMongoC.write_concern_destroy(self)
+  #end
 
   def clone
     WriteConcern.new(LibMongoC.write_concern_copy(self))
