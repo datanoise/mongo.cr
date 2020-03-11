@@ -18,4 +18,4 @@ libraries:
   libmongoc: 1.1.15
 
 license: MIT
-crystal: 0.30.1
+crystal: 0.33.0
