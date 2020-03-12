@@ -34,31 +34,34 @@ class Mongo::IndexOpt
   end
 
   def to_unsafe
-    @opt.background = @background
-    @opt.unique = @unique
-    if name = @name
-      @opt.name = name.to_unsafe
-    end
-    @opt.drop_dups = @drop_dups
-    @opt.sparse = @sparse
-    @opt.expire_after_seconds = @expire_after_seconds.to_i32
-    if weights = @weights
-      @opt.weights = weights.to_unsafe
-    end
-    if partial = @partial_filter_expression
-      @opt.partial_filter_expression = partial.to_unsafe
-    end
-    if collation = @collation
-      @opt.collation = collation.to_unsafe
-    end
+     @opt.background = @background
+     @opt.unique = @unique
+     if name = @name
+       @opt.name = name.to_unsafe
+     end
+     @opt.drop_dups = @drop_dups
+     @opt.sparse = @sparse
+     if @expire_after_seconds != -1
+         @opt.expire_after_seconds = @expire_after_seconds.to_i32
+     end
+     if weights = @weights
+       @opt.weights = weights.to_unsafe
+     end
 
-    if default_language = @default_language
-      @opt.default_language = default_language.to_unsafe
-    end
-    if language_override = @language_override
-      @opt.language_override = language_override.to_unsafe
-    end
+     if partial = @partial_filter_expression
+       @opt.partial_filter_expression = partial.to_unsafe
+     end
 
-    pointerof(@opt)
+     if collation = @collation
+       @opt.collation = collation.to_unsafe
+     end
+
+     if default_language = @default_language
+       @opt.default_language = default_language.to_unsafe
+     end
+     if language_override = @language_override
+       @opt.language_override = language_override.to_unsafe
+     end
+     pointerof(@opt)
   end
 end

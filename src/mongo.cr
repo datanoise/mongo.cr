@@ -14,6 +14,10 @@ module Mongo
     @@logger = logger
   end
 
+  def self.driver_version
+    String.new LibMongoC.mongo_version(nil)
+  end
+
   protected def self.log(level, domain, msg)
     log_level =
       case level

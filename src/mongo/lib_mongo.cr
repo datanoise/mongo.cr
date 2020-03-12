@@ -15,7 +15,8 @@ lib LibMongoC
   fun log_set_handler = mongoc_log_set_handler((LogLevel, UInt8*, UInt8*, Void*) ->, Void*)
   fun mongo_init = mongoc_init (Void*)
   fun mongo_cleanup = mongoc_cleanup (Void*)  
-  
+  fun mongo_version = mongoc_get_version(Void*) : UInt8*
+
   alias BSON = LibBSON::BSON
   alias BSONError = LibBSON::BSONError
 
@@ -283,6 +284,12 @@ lib LibMongoC
     end
   {% end %}
 
+  struct StreamPoll
+    stream: Stream*
+    events: Int32
+    revents: Int32
+  end
+
   struct Stream
     type: Int32
     destroy: (Stream*) ->
@@ -291,12 +298,16 @@ lib LibMongoC
     writev: (Stream*, IOVec*, LibC::SizeT, Int32) -> LibC::SSizeT
     readv: (Stream*, IOVec*, LibC::SizeT, LibC::SizeT, Int32) -> LibC::SSizeT
     setsockopt: (Stream*, Int32, Int32, Void*, Int32) -> Int32
-    get_base_stream: (Stream*) -> Stream*
+    get_base_stream: Pointer(Void) #(Stream*) -> Stream*
     check_closed: (Stream*) -> Bool
+    poll: (StreamPoll*, Int32, Int32) -> LibC::Int
+    failed: Stream* -> Void
+    timed_out: Stream* -> Bool
+    should_retry: Stream* -> Bool
     padding: Void*[7]
   end
 
-  alias StreamInitiator = (Uri, HostList, Void*, BSONError*) -> Stream*
+  alias StreamInitiator = (Uri, HostList, Void*, BSONError*) -> Stream*?
 
   alias GFSFile = Void*
 

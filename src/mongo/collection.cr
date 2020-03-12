@@ -65,7 +65,7 @@ class Mongo::Collection
 
   # This is a simplified interface to command that returns the first result document.
   def command_simple(command, prefs = nil)
-    if LibMongoC.collection_command_simple(self, command.to_bson, out reply, out error)
+    if LibMongoC.collection_command_simple(self, command.to_bson, prefs, out reply, out error)
         repl = BSON.copy_from pointerof(reply)
         LibBSON.bson_destroy(pointerof(reply))
         repl
