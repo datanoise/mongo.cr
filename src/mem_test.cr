@@ -12,13 +12,13 @@ n = 1000
 loop do
     GC.collect
     puts "PRE RUN #{GC.stats.heap_size}"
-    #Benchmark.bm do |x|
-    #    x.report("times:") do
+    Benchmark.bm do |x|
+        x.report("times:") do
             n.times do
               runme
             end
-    #    end
-    #end
+        end
+    end
     GC.collect
     puts "POST RUN #{GC.stats.heap_size}"
     sleep 3
