@@ -35,6 +35,11 @@ class Mongo::Client
     LibMongoC.client_set_stream_initiator(self, -> Stream.initiator, nil)
   end
 
+  # setup ssl options on a client
+  def set_ssl_opts=(options : SSLOpt)
+    LibMongoC.client_set_ssl_opts(self,pointerof(options))
+  end
+
   # Returns a Uri instance used to create Client.
   def uri
     Uri.new LibMongoC.client_get_uri(self)
@@ -210,6 +215,11 @@ class Mongo::ClientPool
       end
     initialize handle
   end
+  # setup ssl options on a client
+  def set_ssl_opts=(options : SSLOpt)
+    LibMongoC.client_pool_set_ssl_opts(self,pointerof(options))
+  end
+
   def pop
     Client.new(LibMongoC.client_pool_pop(self),true)
   end

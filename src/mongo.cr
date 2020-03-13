@@ -18,6 +18,14 @@ module Mongo
     String.new LibMongoC.mongo_version(nil)
   end
 
+  def self.ssl_opt_get_default
+    ssl_defaults = LibMongoC.ssl_opt_get_default(nil)
+    cpy = LibMongoC::SSLOpt.new
+    ssl_ptr = pointerof(cpy)
+    ssl_defaults.copy_to(ssl_ptr,1)
+    cpy
+  end
+
   protected def self.log(level, domain, msg)
     log_level =
       case level

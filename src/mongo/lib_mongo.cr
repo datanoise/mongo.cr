@@ -365,6 +365,18 @@ lib LibMongoC
 
   type Client = Void*
 
+  struct SSLOpt
+    pem_file: UInt8*
+    pem_pwd: UInt8*
+    ca_file: UInt8*
+    ca_dir: UInt8*
+    crl_file: UInt8*
+    weak_cert_validation: Bool
+    allow_invalid_hostname: Bool
+    padding: Void*[7]
+  end
+
+  fun ssl_opt_get_default = mongoc_ssl_opt_get_default(Void*) : SSLOpt*
   fun client_watch = mongoc_client_watch(client: Client, pipeline: BSON, options: BSON) : ChangeStream
   fun client_new = mongoc_client_new(uri_string: UInt8*) : Client
   fun client_set_stream_initiator = mongoc_client_set_stream_initiator(client: Client, initiator: StreamInitiator, user_data: Void*)
@@ -389,7 +401,7 @@ lib LibMongoC
   fun client_set_write_concern = mongoc_client_set_write_concern(client: Client, write_concern: WriteConcern)
   fun client_get_read_prefs = mongoc_client_get_read_prefs(client: Client) : ReadPrefs
   fun client_set_read_prefs = mongoc_client_set_read_prefs(client: Client, prefs: ReadPrefs)
-  # fun client_set_ssl_opts = mongoc_client_set_ssl_opts(client: Client, opts: SSLOpt)
+  fun client_set_ssl_opts = mongoc_client_set_ssl_opts(client: Client, opts: SSLOpt*)
   fun client_get_gridfs = mongoc_client_get_gridfs(client: Client, db: UInt8*, prefix: UInt8*, error: BSONError*) : GridFS
   
   type ClientPool = Void*
@@ -400,7 +412,7 @@ lib LibMongoC
   fun client_pool_try_pop = mongoc_client_pool_try_pop (pool: ClientPool) : Client
   fun client_pool_max_size = mongoc_client_pool_max_size (pool: ClientPool,max_pool_size: UInt32)
   fun client_pool_min_size = mongoc_client_pool_min_size (pool: ClientPool,min_pool_size: UInt32)
-  #fun client_pool_set_ssl_opts = mongoc_client_pool_set_ssl_opts (pool : ClientPool,opts: SSLOpt)
+  fun client_pool_set_ssl_opts = mongoc_client_pool_set_ssl_opts (pool : ClientPool,opts: SSLOpt*)
   fun client_pool_set_error_api = mongoc_client_pool_set_error_api (pool: ClientPool, version: Int32) : Bool
   fun client_pool_set_appname = mongoc_client_pool_set_appname (pool: ClientPool,appname: UInt8*) : Bool
   
