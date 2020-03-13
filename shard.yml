@@ -15,7 +15,7 @@ contributors:
   - Sal Scotto <sal.scotto@gmail.com>
 
 libraries:
-  libmongoc: 1.1.15
+  libmongoc: 1.1.16.2
 
 license: MIT
 crystal: 0.33.0
