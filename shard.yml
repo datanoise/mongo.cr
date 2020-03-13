@@ -1,5 +1,5 @@
 name: mongo
-version: 0.1.5.1
+version: 0.1.6
 
 authors:
   - Jerome Gravel-Niquet <jeromegn@gmail.com>
@@ -18,4 +18,4 @@ libraries:
   libmongoc: 1.1.15
 
 license: MIT
-crystal: 0.32.1
+crystal: 0.33.0
