@@ -1,5 +1,6 @@
 require "../src/bson"
 require "spec"
+require "json"
 
 macro expect_value(v)
   %v = {{v}}
@@ -26,6 +27,14 @@ describe BSON::ObjectId do
   it "should be able to calculate an ObjectId hash" do
     oid = BSON::ObjectId.new
     oid.hash.should be > 0
+  end
+
+  it "should be able to create ObjectId from a json string" do
+    id = "5e70ec155a1ead37204e05f1"
+    json = %("#{id}")
+    oid = BSON::ObjectId.from_json(json)
+    oid.to_s.should eq id
+    oid.to_json.should eq json
   end
 
   it "should be able to get a time" do
