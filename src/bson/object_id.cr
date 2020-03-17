@@ -18,6 +18,12 @@ class BSON
       initialize(handle)
     end
 
+    def self.new(pull : JSON::PullParser)
+      value = BSON::ObjectId.new pull.string_value
+      pull.read_next
+      value
+    end
+
     def hash
       LibBSON.bson_oid_hash(@handle)
     end
@@ -25,7 +31,12 @@ class BSON
     def to_s
       buf = StaticArray(UInt8, 25).new(0_u8)
       LibBSON.bson_oid_to_string(@handle, buf)
-      String.new(buf.to_slice)
+      # bson_oid_to_string returns a null-terminated string
+      String.new(buf.to_slice[0...-1])
+    end
+
+    def to_json(builder : JSON::Builder)
+      builder.string self.to_s
     end
 
     def ==(other : ObjectId)

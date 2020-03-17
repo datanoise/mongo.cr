@@ -37,4 +37,3 @@ describe Mongo::Client do
     client.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY_PREFERRED)
   end
 end
-

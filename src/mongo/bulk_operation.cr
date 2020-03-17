@@ -72,8 +72,8 @@ class Mongo::BulkOperation
       raise BSON::BSONError.new(pointerof(error))
     end
     results = BSON.copy_from pointerof(reply)
-	LibBSON.bson_destroy(pointerof(reply))
-	results
+    LibBSON.bson_destroy(pointerof(reply))
+    results
   end
 
   def to_unsafe

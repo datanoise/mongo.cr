@@ -14,7 +14,7 @@ describe Mongo::GridFS do
       a_file.name.should eq(file.name)
 
       file_list = fs.find
-      file_list.find{|f| f.name == file.name}.should_not be_nil
+      file_list.find { |f| f.name == file.name }.should_not be_nil
     end
   end
 

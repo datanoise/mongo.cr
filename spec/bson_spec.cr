@@ -1,5 +1,6 @@
 require "../src/bson"
 require "spec"
+require "json"
 
 macro expect_value(v)
   %v = {{v}}
@@ -28,6 +29,14 @@ describe BSON::ObjectId do
     oid.hash.should be > 0
   end
 
+  it "should be able to create ObjectId from a json string" do
+    id = "5e70ec155a1ead37204e05f1"
+    json = %("#{id}")
+    oid = BSON::ObjectId.from_json(json)
+    oid.to_s.should eq id
+    oid.to_json.should eq json
+  end
+
   it "should be able to get a time" do
     oid = BSON::ObjectId.new
     (oid.time - Time.utc).should be < 1.seconds
@@ -38,8 +47,13 @@ describe BSON::ObjectId do
     oid2 = BSON::ObjectId.new
     oid1.should be < oid2
   end
-end
 
+  it "should be able to convert to a non null-terminated string" do
+    oid = BSON::ObjectId.new
+    str = oid.to_s
+    str.check_no_null_byte
+  end
+end
 
 describe BSON::Timestamp do
   it "should be comparable" do
@@ -308,6 +322,17 @@ describe BSON do
     match["status"].should eq("A")
   end
 
+  it "should be able to convert NamedTuple to BSON" do
+    query = [{"$match": {"status": "A"}},
+             {"$group": {"_id": "$cust_id", "total": {"$sum": "$amount"}}}]
+    bson_query = query.to_bson
+    elem1 = bson_query["0"]
+    fail "expected BSON" unless elem1.is_a?(BSON)
+    match = elem1["$match"]
+    fail "expected BSON" unless match.is_a?(BSON)
+    match["status"].should eq("A")
+  end
+
   it "should be able to detect array type" do
     ary = ["a", "b", "c"]
     ary.to_bson.array?.should be_true
@@ -324,12 +349,12 @@ describe BSON do
     bson.append_document("doc") do |child|
       child["y"] = "text"
     end
-    h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
+    h = {"x" => 42, "ary" => [1, 2, 3], "doc" => {"y" => "text"}}
     bson.decode.should eq(h)
   end
 
   it "should be able to encode to bson" do
-    h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
+    h = {"x" => 42, "ary" => [1, 2, 3], "doc" => {"y" => "text"}}
     bson = h.to_bson
     bson["x"].should eq(42)
     ary = bson["ary"]
