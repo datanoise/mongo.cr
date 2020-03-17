@@ -28,7 +28,7 @@ class Mongo::IndexOpt
   def initialize(@background = false, @unique = false, @name = nil,
                  @drop_dups = false, @sparse = false, @expire_after_seconds = 0,
                  @weights = nil, @default_language = nil, @language_override = nil,
-                 @partial_filter_expression = nil,@collation = nil)
+                 @partial_filter_expression = nil, @collation = nil)
     @opt = LibMongoC::IndexOpt.new
     LibMongoC.index_opt_init(pointerof(@opt))
   end

@@ -54,7 +54,7 @@ class Mongo::Database
   def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.database_command(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
-                                          command.to_bson, fields.to_bson, prefs)
+      command.to_bson, fields.to_bson, prefs)
   end
 
   # This method shall execute a command on a database.
@@ -97,11 +97,11 @@ class Mongo::Database
 
   # This method create a new collection named `name`.
   def create_collection(name, options = nil)
-   col = LibMongoC.database_create_collection(self, name, options, out error)
-   unless col
+    col = LibMongoC.database_create_collection(self, name, options, out error)
+    unless col
       raise BSON::BSONError.new(pointerof(error))
-   end
-   Collection.new self, col
+    end
+    Collection.new self, col
   end
 
   def gridfs(prefix = "fs")

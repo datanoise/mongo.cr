@@ -69,12 +69,10 @@ describe Mongo::Collection do
 
   it "should be able to insert in bulk" do
     with_collection do |col|
-
       docs = [{"name" => "Bob"}, {"name" => "Joe"}, {"name" => "Steve"}]
       col.insert_bulk docs
 
       col.count.should eq(3)
-
     end
   end
 

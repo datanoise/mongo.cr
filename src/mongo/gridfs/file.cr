@@ -1,5 +1,5 @@
 class Mongo::GridFS::File < IO
-  #include IO
+  # include IO
   # breaking change moved IO from module to class in release 0.24.1
 
   property! timeout_msec
@@ -128,9 +128,9 @@ class Mongo::GridFS::File < IO
     iov.ion_len = slice.bytesize.to_u64
 
     len = LibMongoC.gridfs_file_readv(self, pointerof(iov),
-                                      LibC::SizeT.new(1),
-                                      LibC::SizeT.new(0),
-                                      @timeout_msec.to_u32)
+      LibC::SizeT.new(1),
+      LibC::SizeT.new(0),
+      @timeout_msec.to_u32)
     check_error
     len
   end
@@ -142,8 +142,8 @@ class Mongo::GridFS::File < IO
     iov.ion_len = slice.bytesize.to_u64
 
     len = LibMongoC.gridfs_file_writev(self, pointerof(iov),
-                                       LibC::SizeT.new(1),
-                                       @timeout_msec.to_u32)
+      LibC::SizeT.new(1),
+      @timeout_msec.to_u32)
     check_error
     len
   end
