@@ -38,6 +38,12 @@ describe BSON::ObjectId do
     oid2 = BSON::ObjectId.new
     oid1.should be < oid2
   end
+
+  it "should be able to convert to a non null-terminated string" do
+    oid = BSON::ObjectId.new
+    str = oid.to_s
+    str.check_no_null_byte
+  end
 end
 
 
