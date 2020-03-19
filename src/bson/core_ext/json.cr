@@ -3,15 +3,18 @@ struct JSON::Any
     BSON.from_json self.to_json
   end
 
-  def self.from_bson(bson : BSON::Field)
+  def self.from_bson(bson : BSON::Field) : self
     case bson
     when Bool
+      self.new bson
     when Int64
+      self.new bson
     when Float64
+      self.new bson
     when String
-      self.from_json bson
+      self.new bson
     when BSON
-      self.from_json bson.to_json
+      JSON.parse bson.to_json
     else
       raise "invalid bson"
     end

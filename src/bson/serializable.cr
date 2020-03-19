@@ -66,6 +66,9 @@ module BSON::Serializable
           else
             # The key is required but was not found - or nil.
             raise Exception.new "Unable to deserialize key '#{{{key.stringify}}}' for type '#{{{@type.stringify}}}'."
+          {% else %}
+          else
+            instance.{{ key }} = nil
           {% end %}
           end
         {% end %}
