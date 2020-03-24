@@ -130,6 +130,10 @@ class Mongo::Client
     repl
   end
 
+  def watch(pipeline : BSON = BSON.new, opts : BSON? = nil)
+    ChangeStream.new LibMongoC.client_watch(self, pipeline, opts)
+  end
+
   # Create GridFS instance.
   #
   # @param db: the name of the database which the gridfs instance should exist in.
