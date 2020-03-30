@@ -1,6 +1,8 @@
 # mongo.cr
 
-This library provides binding for MongoDB C Driver. The goal is to provide a driver to access MongoDB.
+[![Build Status](https://travis-ci.org/elbywan/mongo.cr.svg?branch=master)](https://travis-ci.org/elbywan/mongo.cr)
+
+#### This library provides binding for MongoDB C Driver. The goal is to provide a driver to access MongoDB.
 
 # Status
 
