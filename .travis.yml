@@ -1,0 +1,19 @@
+dist: xenial
+
+language: crystal
+crystal:
+  - latest
+  - nightly
+
+addons:
+  apt:
+    update: true
+
+services:
+  - mongodb
+
+before_install:
+  - sudo apt-get install -y libmongoc-dev libbson-dev
+
+script:
+  - crystal spec
