@@ -10,9 +10,9 @@
 
 # Requirements
 
-- Crystal language version 0.20 and higher.
-- libmongoc version >= 1.1.15
-- libbson verion >= 1.1.15
+- Crystal language version 0.32 and higher.
+- libmongoc *(recommended versions: >= 1.15.3)*
+- libbson
 
 On Mac OSX use `homebrew` to install the required libraries:
 

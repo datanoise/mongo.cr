@@ -9,6 +9,6 @@ description: |
   Bindings for MongoDB C Driver.
 
 libraries:
-  libmongoc: 1.1.15
+  libmongoc: 1.15.3
 
 license: MIT
