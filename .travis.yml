@@ -1,19 +1,18 @@
-dist: xenial
+os: osx
 
 language: crystal
 crystal:
   - latest
-  - nightly
 
 addons:
-  apt:
-    update: true
+  homebrew:
+    taps: mongodb/brew
+    packages:
+    - mongo-c
+    - mongodb-community
 
-services:
-  - mongodb
-
-before_install:
-  - sudo apt-get install -y libmongoc-dev libbson-dev
-
+before_script:
+  - brew services start mongodb-community
+  - sleep 1
 script:
   - crystal spec
