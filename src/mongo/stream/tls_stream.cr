@@ -45,7 +45,9 @@ module Mongo::Stream::TLSStream
       io.connect host, port
       context = OpenSSL::SSL::Context::Client.new
       uri_obj = URI.parse String.new(LibMongoC.uri_get_string uri)
-      options = uri_obj.query_params
+      options = uri_obj.query_params.map { |k,v|
+        { k.downcase, v }
+      }.to_h
       # Following the libmongoc openssl context configuration:
       # https://github.com/mongodb/mongo-c-driver/blob/272df14b7be4bd6000045cdf0a56f76855faff80/src/libmongoc/src/mongoc/mongoc-openssl.c#L464
       # And the uri parsing & naming for options:
