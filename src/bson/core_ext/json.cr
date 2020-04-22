@@ -29,7 +29,7 @@ struct JSON::Any
     when String
       self.new bson
     when BSON
-      JSON.parse bson.to_json
+      JSON.parse(bson.to_json).dup
     else
       raise "invalid bson"
     end
