@@ -1,9 +1,9 @@
 name: mongo
-version: 0.2.4
+version: 0.2.5
 
 authors:
   - Julien Elbaz <elbywan@hotmail.com>
-  - Jerome Gravel-Niquet <jeromegn@gmail.com>
+  - Kent Sibilev
 
 description: |
   Bindings for MongoDB C Driver.
