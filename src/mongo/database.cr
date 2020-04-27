@@ -180,6 +180,10 @@ class Mongo::Database
     collection(name)
   end
 
+  def watch(pipeline : BSON = BSON.new, opts : BSON? = nil)
+    ChangeStream.new LibMongoC.database_watch(self, pipeline, opts)
+  end
+
   def to_unsafe
     @handle
   end

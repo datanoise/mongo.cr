@@ -172,6 +172,13 @@ lib LibMongoC
   fun bulk_operation_update_one = mongoc_bulk_operation_update_one(bulk : BulkOperation, selector : BSON,
                                                                    document : BSON, upsert : Bool)
 
+  type ChangeStream = Void*
+
+  fun change_stream_next = mongoc_change_stream_next(stream : ChangeStream, bson : BSON*) : Bool
+  fun change_stream_get_resume_token = mongoc_change_stream_get_resume_token(stream : ChangeStream) : BSON
+  fun change_stream_error_document = mongoc_change_stream_error_document(stream : ChangeStream, err : BSONError*, reply : BSON*) : Bool
+  fun change_stream_destroy = mongoc_change_stream_destroy(stream : ChangeStream) : Void
+
   type Collection = Void*
 
   fun collection_aggregate = mongoc_collection_aggregate(collection : Collection, flags : QueryFlags,
@@ -234,6 +241,7 @@ lib LibMongoC
   fun collection_keys_to_index_string = mongoc_collection_keys_to_index_string(keys : BSON) : UInt8*
   fun collection_validate = mongoc_collection_validate(collection : Collection, options : BSON, reply : BSON,
                                                        error : BSONError*) : Bool
+  fun collection_watch = mongoc_collection_watch(collection : Collection, pipeline : BSON, opts : BSON) : ChangeStream
 
   type Database = Void*
 
@@ -258,6 +266,7 @@ lib LibMongoC
   fun database_find_collections = mongoc_database_find_collections(db : Database, filter : BSON, error : BSONError*) : Cursor
   fun database_get_collection_names = mongoc_database_get_collection_names(db : Database, error : BSONError*) : UInt8**
   fun database_get_collection = mongoc_database_get_collection(db : Database, name : UInt8*) : Collection
+  fun database_watch = mongoc_database_watch(db : Database, pipeline : BSON, opts : BSON) : ChangeStream
 
   {% if flag?(:windows) %}
     struct IOVec
@@ -377,6 +386,7 @@ lib LibMongoC
   fun client_set_read_prefs = mongoc_client_set_read_prefs(client : Client, prefs : ReadPrefs)
   # fun client_set_ssl_opts = mongoc_client_set_ssl_opts(client: Client, opts: SSLOpt)
   fun client_get_gridfs = mongoc_client_get_gridfs(client : Client, db : UInt8*, prefix : UInt8*, error : BSONError*) : GridFS
+  fun client_watch = mongoc_client_watch(client : Client, pipeline : BSON, opts : BSON) : ChangeStream
 
   type ClientPool = Void*
   fun client_pool_new = mongoc_client_pool_new(uri : Uri) : ClientPool
