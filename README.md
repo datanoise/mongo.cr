@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/elbywan/mongo.cr.svg?branch=master)](https://travis-ci.org/elbywan/mongo.cr)
 
-#### This library provides binding for MongoDB C Driver. The goal is to provide a driver to access MongoDB.
+#### This library provides bindings to the MongoDB C Driver.
 
 # Status
 
@@ -10,7 +10,7 @@
 
 # Requirements
 
-- Crystal language version 0.32 and higher.
+- Crystal language version 0.34 and higher.
 - libmongoc *(recommended versions: >= 1.15.3)*
 - libbson
 
@@ -43,9 +43,9 @@ client = Mongo::Client.new "mongodb://<user>:<password>@<host>:<port>/<db_name>"
 db = client["db_name"]
 
 collection = db["collection_name"]
-collection.insert({ "name" => "James Bond", "age" => 37 })
+collection.insert({ name: "James Bond", age: 37 })
 
-collection.find({ "age" => { "$gt" => 30 } }) do |doc|
+collection.find({ age: { "$gt": 30 }}) do |doc|
   puts typeof(doc)    # => BSON
   puts doc
 end
