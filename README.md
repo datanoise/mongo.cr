@@ -30,8 +30,8 @@ Add this to your application's `shard.yml`:
 
 ```yaml
 mongo:
-  github: datanoise/mongo.cr
-  branch: master
+  github: elbywan/mongo.cr
+  version: ~> 0.2.5
 ```
 
 # Usage
