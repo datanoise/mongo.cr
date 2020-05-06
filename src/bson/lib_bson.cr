@@ -1,4 +1,8 @@
-@[Link("bson-1.0")]
+{% if flag?(:static) %}
+  @[Link("libbson-static-1.0")]
+{% else %}
+  @[Link("libbson-1.0")]
+{% end %}
 lib LibBSON
   alias BSONContext = Void*
 

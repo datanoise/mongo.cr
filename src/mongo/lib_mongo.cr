@@ -1,6 +1,10 @@
 require "../bson/lib_bson"
 
-@[Link("mongoc-1.0")]
+{% if flag?(:static) %}
+  @[Link("libmongoc-static-1.0")]
+{% else %}
+  @[Link("libmongoc-1.0")]
+{% end %}
 lib LibMongoC
   enum LogLevel
     ERROR
