@@ -1,34 +1,22 @@
 require "../bson"
 
 class Mongo::IndexOpt
-  @background : Bool
-  @unique : Bool
-  @name : String
-  @drop_dups : Bool
-  @sparse : Bool
-  @expire_after_seconds : Int32
-  @weights : BSON?
-  @default_language : String?
-  @language_override : String?
-  @partial_filter_expression : BSON?
-  @collation : BSON?
-
-  property background
-  property unique
-  property name
-  property drop_dups
-  property sparse
-  property expire_after_seconds
-  property weights
-  property default_language
-  property language_override
-  property partial_filter_expression
-  property collation
+  property background : Bool
+  property unique : Bool
+  property name : String?
+  property drop_dups : Bool
+  property sparse : Bool
+  property expire_after_seconds : Int32
+  property weights : BSON?
+  property default_language : String?
+  property language_override : String?
+  property partial_filter_expression : BSON?
+  property collation : BSON?
 
   def initialize(@background = false, @unique = false, @name = nil,
                  @drop_dups = false, @sparse = false, @expire_after_seconds = 0,
                  @weights = nil, @default_language = nil, @language_override = nil,
-                 @partial_filter_expression = nil,@collation = nil)
+                 @partial_filter_expression = nil, @collation = nil)
     @opt = LibMongoC::IndexOpt.new
     LibMongoC.index_opt_init(pointerof(@opt))
   end
