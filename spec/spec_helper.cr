@@ -29,5 +29,3 @@ def with_collection
     yield col
   end
 end
-
-
