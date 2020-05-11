@@ -1,1 +1,5 @@
-.crystal
+/docs/
+/lib/
+/bin/
+/.shards/
+*.dwarf
