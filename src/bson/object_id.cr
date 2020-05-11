@@ -5,6 +5,10 @@ class BSON
     def initialize(@handle : LibBSON::Oid*)
     end
 
+    def initialize(pull : JSON::PullParser)
+      initialize(pull.read_string)
+    end
+
     def initialize(str : String)
       handle = Pointer(LibBSON::Oid).malloc(1)
       LibBSON.bson_oid_init_from_string(handle, str.to_unsafe)
@@ -25,7 +29,7 @@ class BSON
     def to_s
       buf = StaticArray(UInt8, 25).new(0_u8)
       LibBSON.bson_oid_to_string(@handle, buf)
-      String.new(buf.to_slice)
+      String.new(buf.to_slice).chomp('\u0000')
     end
 
     def to_json(builder : JSON::Builder)
