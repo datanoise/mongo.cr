@@ -83,7 +83,7 @@ module BSON::Serializable
     # user = User.new name: "John"
     # bson = user.to_bson
     # ```
-    def to_bson(bson = BSON.new)
+    def to_bson(bson = BSON.new, prefix = "")
       {% for ivar in @type.instance_vars %}
         {% ann = ivar.annotation(BSON::Prop) %}
         {% typ = ivar.type.union_types.select { |t| t != Nil }[0] %}
@@ -94,17 +94,17 @@ module BSON::Serializable
             unless self.{{ key }}.nil?
           {% end %}
             {% if typ <= Array %}
-              bson.append_array("{{ bson_key }}") do |_, child|
+              bson.append_array("#{prefix}{{ bson_key }}") do |_, child|
                 self.{{ key }}.try &.to_bson(child)
               end
             {% elsif typ <= Hash || typ <= NamedTuple %}
-              bson.append_document("{{ bson_key }}") do |child|
+              bson.append_document("#{prefix}{{ bson_key }}") do |child|
                 self.{{ key }}.try &.to_bson(child)
               end
             {% elsif typ.has_method? :to_bson %}
-              bson["{{ bson_key }}"] = self.{{ key }}.to_bson
+              bson["#{prefix}{{ bson_key }}"] = self.{{ key }}.to_bson
             {% else %}
-              bson["{{ bson_key }}"] = self.{{ key }}
+              bson["#{prefix}{{ bson_key }}"] = self.{{ key }}
             {% end %}
           {% unless ann && ann[:emit_null] %}
             end
