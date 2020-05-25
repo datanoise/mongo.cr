@@ -6,7 +6,7 @@ class Mongo::IndexOpt
   property name : String?
   property drop_dups : Bool
   property sparse : Bool
-  property expire_after_seconds : Int32
+  property expire_after_seconds : Int32?
   property weights : BSON?
   property default_language : String?
   property language_override : String?
@@ -14,7 +14,7 @@ class Mongo::IndexOpt
   property collation : BSON?
 
   def initialize(@background = false, @unique = false, @name = nil,
-                 @drop_dups = false, @sparse = false, @expire_after_seconds = 0,
+                 @drop_dups = false, @sparse = false, @expire_after_seconds = nil,
                  @weights = nil, @default_language = nil, @language_override = nil,
                  @partial_filter_expression = nil, @collation = nil)
     @opt = LibMongoC::IndexOpt.new
@@ -29,13 +29,19 @@ class Mongo::IndexOpt
     end
     @opt.drop_dups = @drop_dups
     @opt.sparse = @sparse
-    @opt.expire_after_seconds = @expire_after_seconds.to_i32
+
+    unless @opt.expire_after_seconds.nil?
+      @opt.expire_after_seconds = @expire_after_seconds.not_nil!.to_i32
+    end
+
     if weights = @weights
       @opt.weights = weights.to_unsafe
     end
+
     if partial = @partial_filter_expression
       @opt.partial_filter_expression = partial.to_unsafe
     end
+
     if collation = @collation
       @opt.collation = collation.to_unsafe
     end
