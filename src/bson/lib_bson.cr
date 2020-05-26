@@ -1,4 +1,8 @@
-@[Link("bson-1.0")]
+{% if flag?(:use_mongo_static) %}
+  @[Link(ldflags: "$(pkg-config libbson-static-1.0 --libs)")]
+{% else %}
+  @[Link("bson-1.0")]
+{% end %}
 lib LibBSON
   alias BSONContext = Void*
 

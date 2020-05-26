@@ -55,6 +55,12 @@ collection.find({ "age" => { "$gt" => 30 } }) do |doc|
 end
 ```
 
+Use compile time flag `-Duse_mongo_static` to use `libbson-static-1.0` and `libmongoc-static-1.0` if you encounter the following error:
+
+```
+/root/.cache/crystal/crystal-run-spec.tmp: error while loading shared libraries: libmongoc-1.0.so.0: cannot open shared object file: No such file or directory
+```
+
 # License
 
 MIT clause - see LICENSE for more details.
