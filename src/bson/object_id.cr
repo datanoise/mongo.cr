@@ -32,6 +32,10 @@ class BSON
       String.new(buf.to_slice).chomp('\u0000')
     end
 
+    def to_json(json : JSON::Builder)
+      json.string(self.to_s)
+    end
+
     def to_json(builder : JSON::Builder)
       builder.scalar(self.to_s)
     end
