@@ -5,13 +5,13 @@ db_name = "my_db_#{Time.utc.to_unix_ms}"
 
 describe Mongo::Database do
   it "should be able to create a new database" do
-    client = Mongo::Client.new("mongodb://localhost")
+    client = 
     db = client[db_name]
     db.name.should eq(db_name)
   end
 
   it "should be able to creata a collection" do
-    client = Mongo::Client.new("mongodb://localhost")
+    client = 
     db = client[db_name]
     db.create_collection("my_col")
 
@@ -26,7 +26,7 @@ describe Mongo::Database do
   end
 
   it "should be able to manage users" do
-    client = Mongo::Client.new("mongodb://localhost")
+    client = 
     db = client[db_name]
     db.add_user("new_user", "new_pass")
     db["my_col"].insert(BSON.new)
@@ -42,7 +42,7 @@ describe Mongo::Database do
   end
 
   it "should be able to modify write_concern" do
-    client = Mongo::Client.new("mongodb://localhost")
+    client = 
     db = client[db_name]
     db.write_concern.fsync.should be_false
     db.write_concern.fsync = true
@@ -54,7 +54,7 @@ describe Mongo::Database do
   end
 
   it "should be able to modify read preferences" do
-    client = Mongo::Client.new("mongodb://localhost")
+    client = 
     db = client[db_name]
     db.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY)
     tag = BSON.new
