@@ -234,7 +234,8 @@ lib LibBSON
   fun bson_destroy = bson_destroy(bson : BSON)
   fun bson_get_data = bson_get_data(bson : BSON) : UInt8*
   fun bson_count_keys = bson_count_keys(bson : BSON) : UInt32
-  fun bson_as_json = bson_as_canonical_extended_json(bson : BSON, length : Int32*) : UInt8*
+  fun bson_as_canonical_extended_json = bson_as_canonical_extended_json(bson : BSON, length : Int32*) : UInt8*
+  fun bson_as_json = bson_as_json(bson : BSON, length : Int32*) : UInt8*
   fun bson_has_field = bson_has_field(bson : BSON, key : UInt8*) : Bool
   fun bson_equal = bson_equal(bson : BSON, other : BSON) : Bool
   fun bson_compare = bson_compare(bson : BSON, other : BSON) : Int32

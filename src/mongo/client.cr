@@ -1,5 +1,5 @@
 require "./uri"
-require "./stream"
+require "./stream/initiator"
 require "./lib_mongo"
 
 # Client class provides access to a MongoDB node, replica-set, or
@@ -137,6 +137,10 @@ class Mongo::Client
     repl = BSON.copy_from pointerof(reply)
     LibBSON.bson_destroy(pointerof(reply))
     repl
+  end
+
+  def watch(pipeline : BSON = BSON.new, opts : BSON? = nil)
+    ChangeStream.new LibMongoC.client_watch(self, pipeline, opts)
   end
 
   # Create GridFS instance.

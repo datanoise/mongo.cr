@@ -15,10 +15,13 @@ describe Mongo::Collection do
       col.insert doc4
       col.count.should eq(4)
 
-      pipeline = [{"$match" => {"status" => "A"}},
-                  {"$group" => {"_id" => "$cust_id", "total" => {"$sum" => "$amount"}}}].to_bson
+      pipeline = [
+        {"$match" => {"status" => "A"}},
+        {"$group" => {"_id" => "$cust_id", "total" => {"$sum" => "$amount"}}},
+        {"$sort" => {"total": 1}},
+      ].to_bson
       cur = col.aggregate(pipeline)
-      s = "[{ \"_id\" : \"A123\", \"total\" : { \"$numberInt\" : \"750\" } }, { \"_id\" : \"B212\", \"total\" : { \"$numberInt\" : \"200\" } }]"
+      s = "[{ \"_id\" : \"A123\", \"total\" : 750 }, { \"_id\" : \"B212\", \"total\" : 200 }]"
       cur.to_a.sort { |a, b| a["_id"].to_s <=> b["_id"].to_s }.to_s.should eq(s)
     end
   end
@@ -26,9 +29,9 @@ describe Mongo::Collection do
   it "should be able to drop a collection" do
     with_collection do |col|
       col.insert({"name" => "Bob"})
-      col.database.not_nil!.collection_names.includes?(col.name).should be_true
+      col.database.try &.collection_names.includes?(col.name).should be_true
       col.drop
-      col.database.not_nil!.collection_names.includes?(col.name).should be_false
+      col.database.try &.collection_names.includes?(col.name).should be_false
     end
   end
 
@@ -130,6 +133,7 @@ describe Mongo::Collection do
       obj["val"] = 42
       obj["type"] = "person"
       col.save(obj)
+
       doc = col.find({"name" => "counter"}).next
       fail "expected BSON" unless doc.is_a?(BSON)
       doc["val"].should eq(42)
@@ -140,7 +144,7 @@ describe Mongo::Collection do
   it "should be able to rename a collection" do
     with_collection do |col|
       col.insert({"name" => "Bob"})
-      col.rename(col.database.not_nil!.name, "new_name")
+      col.rename(col.database.try &.name || "", "new_name")
       col.name.should eq("new_name")
     end
   end

@@ -16,6 +16,7 @@ lib LibMongoC
     TRACE
   end
 
+  @[Raises]
   fun log_set_handler = mongoc_log_set_handler((LogLevel, UInt8*, UInt8*, Void*) ->, Void*)
   fun mongo_init = mongoc_init(Void*)
   fun mongo_cleanup = mongoc_cleanup(Void*)
@@ -405,6 +406,7 @@ lib LibMongoC
   fun client_get_gridfs = mongoc_client_get_gridfs(client : Client, db : UInt8*, prefix : UInt8*, error : BSONError*) : GridFS
 
   type ClientPool = Void*
+
   fun client_pool_new = mongoc_client_pool_new(uri : Uri) : ClientPool
   fun client_pool_destroy = mongoc_client_pool_destroy(pool : ClientPool)
   fun client_pool_pop = mongoc_client_pool_pop(pool : ClientPool) : Client

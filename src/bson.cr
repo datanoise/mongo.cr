@@ -76,6 +76,13 @@ class BSON
     ret
   end
 
+  def to_extended_json
+    cstr = LibBSON.bson_as_canonical_extended_json(handle, out length)
+    ret = String.new(cstr, length)
+    LibBSON.bson_free(cstr.as(Void*))
+    ret
+  end
+
   def has_key?(key)
     LibBSON.bson_has_field(handle, key)
   end
@@ -222,7 +229,7 @@ class BSON
 
   def append_document(key)
     child_handle = LibBSON.bson_new
-    child = BSON.new child_handle
+    child = BSON.new(child_handle)
     begin
       yield child
       LibBSON.bson_append_document(handle, key, key.bytesize, child_handle)

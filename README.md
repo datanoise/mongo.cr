@@ -29,6 +29,8 @@ cmake -DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF
 sudo make install
 ```
 
+See [the official guide](http://mongoc.org/libmongoc/current/installing.html).
+
 ## Installation
 
 Add this to your application's `shard.yml`:
@@ -48,9 +50,9 @@ client = Mongo::Client.new "mongodb://<user>:<password>@<host>:<port>/<db_name>"
 db = client["db_name"]
 
 collection = db["collection_name"]
-collection.insert({ "name" => "James Bond", "age" => 37 })
+collection.insert({ name: "James Bond", age: 37 })
 
-collection.find({ "age" => { "$gt" => 30 } }) do |doc|
+collection.find({ age: { "$gt": 30 }}) do |doc|
   puts typeof(doc)    # => BSON
   puts doc
 end

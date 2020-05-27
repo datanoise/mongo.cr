@@ -313,6 +313,10 @@ class Mongo::Collection
     BulkOperation.new LibMongoC.collection_create_bulk_operation(self, ordered, write_concern)
   end
 
+  def watch(pipeline : BSON = BSON.new, opts : BSON? = nil)
+    ChangeStream.new LibMongoC.collection_watch(self, pipeline, opts)
+  end
+
   def to_unsafe
     @handle
   end
