@@ -9,7 +9,7 @@ def mongo_test_uri
 end
 
 def create_client
-  client = 
+  client = Mongo::Client.new(mongo_test_uri)
   client.setup_stream
   client
 end

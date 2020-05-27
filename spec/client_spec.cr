@@ -3,14 +3,14 @@ require "spec"
 
 describe Mongo::Client do
   it "should be able to connect to a server" do
-    client = 
-    client.uri.string.should eq("mongodb://localhost")
+    client = Mongo::Client.new(mongo_test_uri)
+    client.uri.string.should eq(mongo_test_uri)
     client.max_message_size.should be > 0
     client.max_bson_size.should be > 0
   end
 
   it "should be able to modify write_concern" do
-    client = 
+    client = Mongo::Client.new(mongo_test_uri)
     client.write_concern.fsync.should be_false
     client.write_concern.fsync = true
     client.write_concern.fsync.should be_true
@@ -21,7 +21,7 @@ describe Mongo::Client do
   end
 
   it "should be able to modify read preferences" do
-    client = 
+    client = Mongo::Client.new(mongo_test_uri)
     client.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY)
     tag = BSON.new
     tag["name"] = "my_tag"
@@ -37,4 +37,3 @@ describe Mongo::Client do
     client.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY_PREFERRED)
   end
 end
-

@@ -30,7 +30,7 @@ class Mongo::IndexOpt
     @opt.drop_dups = @drop_dups
     @opt.sparse = @sparse
 
-    unless @opt.expire_after_seconds.nil?
+    unless @expire_after_seconds.nil?
       @opt.expire_after_seconds = @expire_after_seconds.not_nil!.to_i32
     end
 
