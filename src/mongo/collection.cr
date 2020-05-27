@@ -25,9 +25,10 @@ class Mongo::Collection
     @owned = false
   end
 
-  def finalize
-    LibMongoC.collection_destroy(@handle) if @owned && @valid
-  end
+  # Commenting prevents freeing bson pointers twice and crashing the program.
+  # def finalize
+  #   LibMongoC.collection_destroy(@handle) if @owned && @valid
+  # end
 
   def watch(pipeline = BSON.new, options = BSON.new)
     ChangeStream.new LibMongoC.collection_watch(self, pipeline.to_bson, options.to_bson)
