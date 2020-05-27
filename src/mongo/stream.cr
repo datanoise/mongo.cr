@@ -2,7 +2,7 @@ require "socket"
 
 # http://mongoc.org/libmongoc/current/mongoc_client_t.html#streams
 module Mongo::Stream
-  @@registry = {} of LibMongoC::Stream* => { Socket, String, UInt16, Bool }
+  @@registry = {} of LibMongoC::Stream* => {Socket, String, UInt16, Bool}
 
   def self.initiator(uri : LibMongoC::Uri, host : LibMongoC::HostList, user_data : Void*, error : LibBSON::BSONError*)
     begin
@@ -13,21 +13,22 @@ module Mongo::Stream
       stream = LibC.malloc(sizeof(LibMongoC::Stream).to_u32).as(LibMongoC::Stream*)
 
       stream.value.type = 0
-      stream.value.destroy = -> (stream : LibMongoC::Stream*) {
+      stream.value.destroy = ->(stream : LibMongoC::Stream*) {
         @@registry.delete(stream)
         LibC.free(stream.as(Void*))
       }
-      stream.value.close = -> (stream : LibMongoC::Stream*) {
+      stream.value.close = ->(stream : LibMongoC::Stream*) {
         io = Stream.get_io(stream)
-        io.close() unless io.closed?
+        io.close unless io.closed?
         0
       }
-      stream.value.flush = -> (stream : LibMongoC::Stream*) {
+      stream.value.flush = ->(stream : LibMongoC::Stream*) {
         io = Stream.get_io(stream)
         io.flush
         0
       }
-      stream.value.writev = -> (stream : LibMongoC::Stream*, iov : LibMongoC::IOVec*, iovcnt : LibC::SizeT, timeout_msec : Int32) {
+
+      stream.value.writev = ->(stream : LibMongoC::Stream*, iov : LibMongoC::IOVec*, iovcnt : LibC::SizeT, timeout_msec : Int32) {
         io = Stream.get_io(stream)
         count = 0_i64
         begin
@@ -47,7 +48,8 @@ module Mongo::Stream
         end
         LibC::SSizeT.cast(count)
       }
-      stream.value.readv = -> (stream : LibMongoC::Stream*, iov : LibMongoC::IOVec*, iovcnt : LibC::SizeT, min_bytes : LibC::SizeT, timeout : Int32) {
+
+      stream.value.readv = ->(stream : LibMongoC::Stream*, iov : LibMongoC::IOVec*, iovcnt : LibC::SizeT, min_bytes : LibC::SizeT, timeout : Int32) {
         io = Stream.get_io(stream)
         count = 0_i64
         begin
@@ -63,24 +65,32 @@ module Mongo::Stream
         end
         LibC::SSizeT.cast(count)
       }
-      stream.value.setsockopt = -> (stream : LibMongoC::Stream*, level : Int32, optname : Int32, optval : Void*, optlen : Int32) {
+
+      stream.value.setsockopt = ->(stream : LibMongoC::Stream*, level : Int32, optname : Int32, optval : Void*, optlen : Int32) {
         io = Stream.get_io(stream)
         LibC.setsockopt(io.fd, level, optname, optval, optlen)
       }
+
       stream.value.get_base_stream = Pointer(Void).null
-      stream.value.check_closed = -> (stream : LibMongoC::Stream*) {
+      stream.value.check_closed = ->(stream : LibMongoC::Stream*) {
         io = Stream.get_io(stream)
         io.closed?
       }
-      stream.value.poll = ->(stream_poll_array: LibMongoC::StreamPoll*, nstreams: Int32, timeout_msec: Int32) {
+      stream.value.poll = ->(stream_poll_array : LibMongoC::StreamPoll*, nstreams : Int32, timeout_msec : Int32) {
         (0...nstreams).each do |index|
           stream_poll = stream_poll_array[index]
           io = Stream.get_io(stream_poll.stream)
+          begin
+            io.connect *Stream.get_address(stream_poll.stream)
+          rescue err
+            pp err
+          end
           stream_poll.revents = io.try &.closed? ? 0x08 : stream_poll.events
           stream_poll_array[index] = stream_poll
         end
         nstreams
       }
+
       stream.value.failed = ->(stream : LibMongoC::Stream*) {
         io = Stream.get_io(stream)
         io.close unless io.closed?
@@ -96,7 +106,7 @@ module Mongo::Stream
         false
       }
 
-      @@registry[stream] = { socket, String.new(host.value.host.to_slice), host.value.port, false }
+      @@registry[stream] = {socket, String.new(host.value.host.to_slice), host.value.port, false}
       stream
     rescue
       nil
@@ -110,5 +120,10 @@ module Mongo::Stream
       @@registry[stream] = {io, host, port, true}
     end
     io
+  end
+
+  def self.get_address(stream : LibMongoC::Stream*)
+    _, host, port = @@registry[stream]
+    {host, port}
   end
 end

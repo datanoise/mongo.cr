@@ -1,5 +1,6 @@
 require "../src/bson"
 require "spec"
+require "json"
 
 macro expect_value(v)
   %v = {{v}}
@@ -28,6 +29,14 @@ describe BSON::ObjectId do
     oid.hash.should be > 0
   end
 
+  it "should be able to create ObjectId from a json string" do
+    id = "5e70ec155a1ead37204e05f1"
+    json = %("#{id}")
+    oid = BSON::ObjectId.from_json(json)
+    oid.to_s.should eq id
+    oid.to_json.should eq json
+  end
+
   it "should be able to get a time" do
     oid = BSON::ObjectId.new
     (oid.time - Time.utc).should be < 1.seconds
@@ -38,8 +47,13 @@ describe BSON::ObjectId do
     oid2 = BSON::ObjectId.new
     oid1.should be < oid2
   end
-end
 
+  it "should be able to convert to a non null-terminated string" do
+    oid = BSON::ObjectId.new
+    str = oid.to_s
+    str.check_no_null_byte
+  end
+end
 
 describe BSON::Timestamp do
   it "should be comparable" do
@@ -308,6 +322,17 @@ describe BSON do
     match["status"].should eq("A")
   end
 
+  it "should be able to convert NamedTuple to BSON" do
+    query = [{"$match": {"status": "A"}},
+             {"$group": {"_id": "$cust_id", "total": {"$sum": "$amount"}}}]
+    bson_query = query.to_bson
+    elem1 = bson_query["0"]
+    fail "expected BSON" unless elem1.is_a?(BSON)
+    match = elem1["$match"]
+    fail "expected BSON" unless match.is_a?(BSON)
+    match["status"].should eq("A")
+  end
+
   it "should be able to detect array type" do
     ary = ["a", "b", "c"]
     ary.to_bson.array?.should be_true
@@ -324,12 +349,12 @@ describe BSON do
     bson.append_document("doc") do |child|
       child["y"] = "text"
     end
-    h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
+    h = {"x" => 42, "ary" => [1, 2, 3], "doc" => {"y" => "text"}}
     bson.decode.should eq(h)
   end
 
   it "should be able to encode to bson" do
-    h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
+    h = {"x" => 42, "ary" => [1, 2, 3], "doc" => {"y" => "text"}}
     bson = h.to_bson
     bson["x"].should eq(42)
     ary = bson["ary"]
@@ -343,10 +368,140 @@ describe BSON do
     bson.to_s.should eq s
   end
 
+  it "should decode canonical extended json" do
+    s = "{ \"sval\" : \"1234\", \"ival\" : 1234 }"
+    q = "{ \"sval\" : \"1234\", \"ival\" : { \"$numberInt\" : \"1234\" } }"
+    bson = BSON.from_json q
+    bson.to_s.should eq s
+  end
+
+  it "should output canonical extended json" do
+    q = "{ \"sval\" : \"1234\", \"ival\" : { \"$numberInt\" : \"1234\" } }"
+    bson = BSON.from_json q
+    bson.to_extended_json.should eq q
+  end
+
+  it "should be able to read binary data" do
+    bson = BSON.new
+    bson["bin"] = BSON::Binary.new(BSON::Binary::SubType::Binary, "binary".to_slice)
+    value = bson["bin"].as(BSON::Binary)
+    String.new(value.data).should eq("binary")
+  end
+
   it "should error json" do
     s = "{ this = wrong }"
     expect_raises(Exception) do
-      bson = BSON.from_json s
+      _ = BSON.from_json s
     end
+  end
+end
+
+class Inner
+  include BSON::Serializable
+  include JSON::Serializable
+
+  property key : String?
+end
+
+class Outer
+  include BSON::Serializable
+  include JSON::Serializable
+
+  def initialize(**args)
+    {% for ivar in @type.instance_vars %}
+      {% if ivar.type.nilable? %}
+        instance.{{ivar.id}} = args["{{ivar.id}}"]?
+      {% else %}
+        instance.{{ivar.id}} = args["{{ivar.id}}"]
+      {% end %}
+    {% end %}
+  end
+
+  property str : String
+  property optional_int : Int32?
+  property array_of_union_types : Array(String | Int32)
+  property nested_object : Inner
+  property array_of_objects : Array(Inner)
+  property free_form : JSON::Any
+  property hash : Hash(String, String | Int32)
+
+  @[BSON::Prop(key: other_str)]
+  @[JSON::Field(key: other_str)]
+  property renamed_string : String
+
+  @[BSON::Prop(ignore: true)]
+  @[JSON::Field(ignore: true)]
+  property ignored_field : String?
+end
+
+reference_json = %({
+      "str": "str",
+      "optional_int": 10,
+      "array_of_union_types": [
+          10,
+          "str"
+      ],
+      "nested_object": {
+          "key": "value"
+      },
+      "array_of_objects": [
+          {
+              "key": "0"
+          }
+      ],
+      "free_form": {
+          "one": 1,
+          "two": "two"
+      },
+      "hash": {
+          "one": 1,
+          "two": "two"
+      },
+      "other_str": "str"
+  })
+
+describe BSON::Serializable do
+  it "should perform a round-trip" do
+    bson = BSON.new
+    bson["str"] = "str"
+    bson["optional_int"] = 10
+    bson.append_array("array_of_union_types") { |child|
+      child << 10
+      child << "str"
+    }
+    bson.append_document("nested_object") { |child|
+      child["key"] = "value"
+    }
+    index = 0
+    bson.append_array("array_of_objects") { |_, child|
+      child.append_document(index.to_s) { |c|
+        c["key"] = index.to_s
+      }
+    }
+    free_form = BSON.new
+    free_form["one"] = 1
+    free_form["two"] = "two"
+    bson["free_form"] = free_form
+    hash = BSON.new
+    hash["one"] = 1
+    hash["two"] = "two"
+    bson["hash"] = hash
+    bson["other_str"] = "str"
+
+    expected_json = JSON.parse(reference_json).to_json
+
+    # bson -> json
+    JSON.parse(bson.to_json).to_json.should eq expected_json
+
+    # bson -> bson::serializable
+    bson["ignored_field"] = "nope"
+    instance = Outer.from_bson bson
+    # test the annotations
+    instance.renamed_string.should eq bson["other_str"]
+    instance.ignored_field.should be_nil
+    # bson::serializable -> json
+    instance.to_json.should eq expected_json
+    # bson::serializable -> bson -> json
+    JSON.parse(instance.to_bson.to_json).to_json.should eq expected_json
   end
 end

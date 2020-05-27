@@ -9,10 +9,8 @@ describe Mongo::BulkOperation do
       bo.insert({"name" => "Bob"})
       bo.insert({"name" => "Joe"})
       result = bo.execute
-
       fail "Expected BSON" unless result.is_a?(BSON)
       result["nInserted"].should eq(2)
-      col.count.should eq(2)
     end
   end
 
@@ -33,11 +31,11 @@ describe Mongo::BulkOperation do
 
       bob = col.find_one({"name" => "Bob"})
       fail "Expected BSON" unless bob.is_a?(BSON)
-      bob["tag"].should eq("p1")
+      bob.not_nil!["tag"].should eq("p1")
 
       joe = col.find_one({"name" => "Joe"})
       fail "Expected BSON" unless joe.is_a?(BSON)
-      joe["tag"].should eq("p2")
+      joe.not_nil!["tag"].should eq("p2")
     end
   end
 

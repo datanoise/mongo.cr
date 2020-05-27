@@ -2,6 +2,8 @@ require "./lib_mongo"
 require "./host"
 
 class Mongo::Cursor
+  @closed : Bool = true
+
   def initialize(@handle : LibMongoC::Cursor)
     unless @handle
       raise "Unable to initialize Cursor"
@@ -19,6 +21,7 @@ class Mongo::Cursor
   def close
     return if @closed
     LibMongoC.cursor_destroy(self)
+    @data.clear(1)
     @closed = true
   end
 

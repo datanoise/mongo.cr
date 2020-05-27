@@ -36,4 +36,13 @@ describe Mongo::Client do
     client.read_prefs = read_prefs
     client.read_prefs.mode.should eq(LibMongoC::ReadMode::PRIMARY_PREFERRED)
   end
+
+  it "should read default ssl opts" do
+    opts = Mongo.ssl_opt_get_default
+    if opts.is_a?(LibMongoC::SSLOpt)
+      opts.allow_invalid_hostname.should be_false
+    else
+      fail("expceted a sslopt object")
+    end
+  end
 end
