@@ -40,7 +40,6 @@ describe BSON::ObjectId do
   end
 end
 
-
 describe BSON::Timestamp do
   it "should be comparable" do
     t = Time.utc
@@ -324,12 +323,12 @@ describe BSON do
     bson.append_document("doc") do |child|
       child["y"] = "text"
     end
-    h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
+    h = {"x" => 42, "ary" => [1, 2, 3], "doc" => {"y" => "text"}}
     bson.decode.should eq(h)
   end
 
   it "should be able to encode to bson" do
-    h = {"x" => 42, "ary" => [1,2,3], "doc" => {"y" => "text"}}
+    h = {"x" => 42, "ary" => [1, 2, 3], "doc" => {"y" => "text"}}
     bson = h.to_bson
     bson["x"].should eq(42)
     ary = bson["ary"]
@@ -339,8 +338,16 @@ describe BSON do
 
   it "should decode json" do
     s = "{ \"sval\" : \"1234\", \"ival\" : 1234 }"
+    g = "{ \"sval\" : \"1234\", \"ival\" : { \"$numberInt\" : \"1234\" } }"
     bson = BSON.from_json s
-    bson.to_s.should eq s
+    bson.to_s.should eq g
+  end
+
+  it "should be able to read binary data" do
+    bson = BSON.new
+    bson["bin"] = BSON::Binary.new(BSON::Binary::SubType::Binary, "binary".to_slice)
+    value = bson["bin"].as(BSON::Binary)
+    String.new(value.data).should eq("binary")
   end
 
   it "should error json" do

@@ -1,5 +1,8 @@
+require "json"
+
 class Hash(K, V)
   def to_bson(bson = BSON.new)
+    # return BSON.from_json(self.to_json)
     each do |k, v|
       case v
       when Array

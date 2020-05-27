@@ -21,8 +21,7 @@ describe Mongo::Database do
     col.should_not be_nil
 
     db.collection_names.includes?("my_col").should be_true
-
-    db.drop
+    db["my_col"].drop
   end
 
   it "should be able to manage users" do

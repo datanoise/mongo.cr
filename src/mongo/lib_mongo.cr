@@ -19,6 +19,7 @@ lib LibMongoC
   fun log_set_handler = mongoc_log_set_handler((LogLevel, UInt8*, UInt8*, Void*) ->, Void*)
   fun mongo_init = mongoc_init(Void*)
   fun mongo_cleanup = mongoc_cleanup(Void*)
+  fun mongo_version = mongoc_get_version(Void*) : UInt8*
 
   alias BSON = LibBSON::BSON
   alias BSONError = LibBSON::BSONError
@@ -160,6 +161,13 @@ lib LibMongoC
   fun index_opt_get_default = mongoc_index_opt_get_default : IndexOpt*
   fun index_opt_init = mongoc_index_opt_init(opt : IndexOpt*)
 
+  type ChangeStream = Void*
+
+  fun change_stream_destroy = mongoc_change_stream_destroy(stream : ChangeStream)
+  fun change_stream_get_resume_token = mongoc_change_stream_get_resume_token(stream : ChangeStream) : BSON
+  fun change_stream_next = mongoc_change_stream_next(stream : ChangeStream, bson : BSON*) : Bool
+  fun change_stream_error_document = mongoc_change_stream_error_document(stream : ChangeStream, error : BSONError, bson : BSON*) : Bool
+
   type BulkOperation = Void*
 
   fun bulk_operation_destroy = mongoc_bulk_operation_destroy(bulk : BulkOperation)
@@ -177,6 +185,7 @@ lib LibMongoC
 
   type Collection = Void*
 
+  fun collection_watch = mongoc_collection_watch(collection : Collection, pipeline : BSON, options : BSON) : ChangeStream
   fun collection_aggregate = mongoc_collection_aggregate(collection : Collection, flags : QueryFlags,
                                                          pipeline : BSON, options : BSON,
                                                          prefs : ReadPrefs) : Cursor
@@ -240,6 +249,7 @@ lib LibMongoC
 
   type Database = Void*
 
+  fun database_watch = mongoc_database_watch(db : Database, pipeline : BSON, options : BSON) : ChangeStream
   fun database_get_name = mongoc_database_get_name(db : Database) : UInt8*
   fun database_remove_user = mongoc_database_remove_user(db : Database, username : UInt8*, error : BSONError*) : Bool
   fun database_remove_all_users = mongoc_database_remove_all_users(db : Database, error : BSONError*) : Bool
@@ -355,6 +365,19 @@ lib LibMongoC
 
   type Client = Void*
 
+  struct SSLOpt
+    pem_file : UInt8*
+    pem_pwd : UInt8*
+    ca_file : UInt8*
+    ca_dir : UInt8*
+    crl_file : UInt8*
+    weak_cert_validation : Bool
+    allow_invalid_hostname : Bool
+    padding : Void*[7]
+  end
+
+  fun ssl_opt_get_default = mongoc_ssl_opt_get_default(Void*) : SSLOpt*
+  fun client_watch = mongoc_client_watch(client : Client, pipeline : BSON, options : BSON) : ChangeStream
   fun client_new = mongoc_client_new(uri_string : UInt8*) : Client
   fun client_set_stream_initiator = mongoc_client_set_stream_initiator(client : Client, initiator : StreamInitiator, user_data : Void*)
   fun client_new_from_uri = mongoc_client_new_from_uri(uri : Uri) : Client
@@ -378,7 +401,7 @@ lib LibMongoC
   fun client_set_write_concern = mongoc_client_set_write_concern(client : Client, write_concern : WriteConcern)
   fun client_get_read_prefs = mongoc_client_get_read_prefs(client : Client) : ReadPrefs
   fun client_set_read_prefs = mongoc_client_set_read_prefs(client : Client, prefs : ReadPrefs)
-  # fun client_set_ssl_opts = mongoc_client_set_ssl_opts(client: Client, opts: SSLOpt)
+  fun client_set_ssl_opts = mongoc_client_set_ssl_opts(client : Client, opts : SSLOpt*)
   fun client_get_gridfs = mongoc_client_get_gridfs(client : Client, db : UInt8*, prefix : UInt8*, error : BSONError*) : GridFS
 
   type ClientPool = Void*
@@ -389,7 +412,7 @@ lib LibMongoC
   fun client_pool_try_pop = mongoc_client_pool_try_pop(pool : ClientPool) : Client
   fun client_pool_max_size = mongoc_client_pool_max_size(pool : ClientPool, max_pool_size : UInt32)
   fun client_pool_min_size = mongoc_client_pool_min_size(pool : ClientPool, min_pool_size : UInt32)
-  # fun client_pool_set_ssl_opts = mongoc_client_pool_set_ssl_opts (pool : ClientPool,opts: SSLOpt)
+  fun client_pool_set_ssl_opts = mongoc_client_pool_set_ssl_opts(pool : ClientPool, opts : SSLOpt*)
   fun client_pool_set_error_api = mongoc_client_pool_set_error_api(pool : ClientPool, version : Int32) : Bool
   fun client_pool_set_appname = mongoc_client_pool_set_appname(pool : ClientPool, appname : UInt8*) : Bool
 end

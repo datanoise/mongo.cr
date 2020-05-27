@@ -1,5 +1,6 @@
 class Array(T)
   def to_bson(bson = BSON.new)
+    # return BSON.from_json(self.to_json)
     each_with_index do |item, i|
       case item
       when Array

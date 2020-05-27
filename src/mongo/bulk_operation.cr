@@ -3,6 +3,8 @@ require "./lib_mongo"
 # This class provides an abstraction for submitting multiple write operations
 # as a single batch.
 class Mongo::BulkOperation
+  @valid : Bool = false
+
   def initialize(@handle : LibMongoC::BulkOperation)
     raise "invalid handle" unless @handle
     @executed = false
@@ -72,8 +74,8 @@ class Mongo::BulkOperation
       raise BSON::BSONError.new(pointerof(error))
     end
     results = BSON.copy_from pointerof(reply)
-	LibBSON.bson_destroy(pointerof(reply))
-	results
+    LibBSON.bson_destroy(pointerof(reply))
+    results
   end
 
   def to_unsafe

@@ -10,7 +10,7 @@ class Mongo::Client
   @handle : LibMongoC::Client
   property pooled : Bool = false
 
-  def initialize(@handle : LibMongoC::Client,@pooled : Bool = false)
+  def initialize(@handle : LibMongoC::Client, @pooled : Bool = false)
     raise "invalid handle" unless @handle
   end
 
@@ -25,10 +25,19 @@ class Mongo::Client
     initialize handle
   end
 
+  def watch(pipeline = BSON.new, options = BSON.new)
+    ChangeStream.new LibMongoC.client_watch(self, pipeline.to_bson, options.to_bson)
+  end
+
   # Use this method to set up the crystal implementation of underlying stream API.
   # This is useful to make mongo client's IO operations to play nicely with Fiber API.
   def setup_stream
-    LibMongoC.client_set_stream_initiator(self, -> Stream.initiator, nil)
+    LibMongoC.client_set_stream_initiator(self, ->Stream.initiator, nil)
+  end
+
+  # setup ssl options on a client
+  def set_ssl_opts=(options : SSLOpt)
+    LibMongoC.client_set_ssl_opts(self, pointerof(options))
   end
 
   # Returns a Uri instance used to create Client.
@@ -41,7 +50,7 @@ class Mongo::Client
   def command(db_name, query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.client_command(self, db_name, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
-                                        query, fields, prefs)
+      query, fields, prefs)
   end
 
   # This method executes a command on the server using the database and command
@@ -81,8 +90,8 @@ class Mongo::Client
   # Get a newly allocated Collection for the collection named `collection_name`
   # in the database named `db_name`.
   def collection(db_name, collection_name)
-    #database(db_name).collection(collection_name)
-    Collection.new LibMongoC.client_get_collection(self, db_name,collection_name)
+    # database(db_name).collection(collection_name)
+    Collection.new LibMongoC.client_get_collection(self, db_name, collection_name)
   end
 
   # This method queries the MongoDB server for a list of known databases.
@@ -192,10 +201,13 @@ end
 
 class Mongo::ClientPool
   @handle : LibMongoC::ClientPool
+  @valid : Bool = false
+
   def initialize(@handle : LibMongoC::ClientPool)
     raise "invalid handle" unless @handle
     @valid = true
   end
+
   # Creates a new Client using uri expressed as a String or Uri class instance.
   def initialize(uri : String | Uri = "mongodb://localhost")
     handle =
@@ -206,33 +218,46 @@ class Mongo::ClientPool
       end
     initialize handle
   end
+
+  # setup ssl options on a client
+  def set_ssl_opts=(options : SSLOpt)
+    LibMongoC.client_pool_set_ssl_opts(self, pointerof(options))
+  end
+
   def pop
-    Client.new(LibMongoC.client_pool_pop(self),true)
+    Client.new(LibMongoC.client_pool_pop(self), true)
   end
+
   def push(client : Client)
-    LibMongoC.client_pool_push(self,client)
+    LibMongoC.client_pool_push(self, client)
   end
+
   def try_pop
     handle = LibMongoC.client_pool_try_pop(self)
     if handle
-        Client.new(handle,true)
+      Client.new(handle, true)
     else
-        nil
+      nil
     end
   end
+
   def max_size=(size : UInt32)
-    LibMongoC.client_pool_max_size(self,size)
+    LibMongoC.client_pool_max_size(self, size)
   end
+
   def min_size=(size : UInt32)
-    LibMongoC.client_pool_min_size(self,size)
+    LibMongoC.client_pool_min_size(self, size)
   end
+
   def invalidate
     @valid = false
     LibMongoC.client_pool_destroy(@handle)
   end
+
   def finalize
     LibMongoC.client_pool_destroy(self) if @valid
   end
+
   def to_unsafe
     @handle
   end

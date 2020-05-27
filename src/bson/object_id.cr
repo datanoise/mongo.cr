@@ -40,6 +40,10 @@ class BSON
       builder.scalar(self.to_s)
     end
 
+    def to_json(json : JSON::Builder)
+      json.string to_s
+    end
+
     def ==(other : ObjectId)
       LibBSON.bson_oid_equal(@handle, other)
     end

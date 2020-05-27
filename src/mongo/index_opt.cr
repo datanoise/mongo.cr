@@ -46,13 +46,20 @@ class Mongo::IndexOpt
       @opt.collation = collation.to_unsafe
     end
 
+    if partial = @partial_filter_expression
+      @opt.partial_filter_expression = partial.to_unsafe
+    end
+
+    if collation = @collation
+      @opt.collation = collation.to_unsafe
+    end
+
     if default_language = @default_language
       @opt.default_language = default_language.to_unsafe
     end
     if language_override = @language_override
       @opt.language_override = language_override.to_unsafe
     end
-
     pointerof(@opt)
   end
 end
