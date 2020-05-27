@@ -1,6 +1,7 @@
-# mongo.cr
+# mongo.cr 
 
 [![Build Status](https://travis-ci.com/kalinon/mongo.cr.svg?branch=master)](https://travis-ci.com/kalinon/mongo.cr)
+
 This library provides binding for MongoDB C Driver. The goal is to provide a driver to access MongoDB.
 
 # Status
