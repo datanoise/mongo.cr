@@ -211,6 +211,11 @@ class BSON
     LibBSON.bson_append_document(handle, key, key.bytesize, value)
   end
 
+  def []=(key, value : ::UUID)
+    LibBSON.bson_append_binary(handle, key, key.bytesize,
+      LibBSON::SubType::BSON_SUBTYPE_UUID, value.bytes.dup.to_slice, 16)
+  end
+
   def []=(key, value : Regex)
     modifiers = value.options
     options =

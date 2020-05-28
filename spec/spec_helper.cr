@@ -1,3 +1,6 @@
+require "dotenv"
+Dotenv.load if File.exists?(".env")
+
 def mongo_test_uri
   URI.new(
     scheme: "mongodb",

@@ -85,6 +85,15 @@ describe BSON do
     bson.has_key?("bin").should be_true
   end
 
+  it "should be able to append uuid" do
+    bson = BSON.new
+    uuid = UUID.random
+    bson["uuid"] = uuid
+    bson.count.should eq(1)
+    bson.has_key?("uuid").should be_true
+    UUID.from_bson(bson["uuid"]).should eq uuid
+  end
+
   it "should be able to append boolean" do
     bson = BSON.new
     bson["bool"] = true
@@ -309,6 +318,15 @@ describe BSON do
 
     copy = bson.clone
     copy.should eq(bson)
+  end
+
+  it "should be able to convert UUID to BSON" do
+    uuid = UUID.random
+    bson = BSON.new
+    bson["uuid"] = uuid
+    bson["uuid"].should be_a BSON::Binary
+    UUID.from_bson(bson["uuid"]).should eq uuid
+    bson["uuid"].as(BSON::Binary).data.should eq uuid.bytes.to_slice
   end
 
   it "should be able to convert Hash to BSON" do

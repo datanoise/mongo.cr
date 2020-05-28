@@ -21,3 +21,7 @@ libraries:
 
 license: MIT
 crystal: 0.34.0
+
+development_dependencies:
+  dotenv:
+    github: gdotdesign/cr-dotenv
