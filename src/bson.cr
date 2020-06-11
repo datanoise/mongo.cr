@@ -207,6 +207,10 @@ class BSON
     end
   end
 
+  def []=(key, value : Array(BSON::Field) | Hash(String, BSON::Field))
+    LibBSON.bson_append_document(handle, key, key.bytesize, value.to_bson)
+  end
+
   def []=(key, value : BSON)
     LibBSON.bson_append_document(handle, key, key.bytesize, value)
   end

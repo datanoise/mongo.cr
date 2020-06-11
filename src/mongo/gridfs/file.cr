@@ -135,8 +135,13 @@ class Mongo::GridFS::File < IO
     len
   end
 
+  {% begin %}
   # Performs a gathered write to the underlying gridfs file.
+  {% if compare_versions(Crystal::VERSION, "0.35.0-0") >= 0 %}
+  def write(slice : Slice(UInt8)) : Int64
+  {% else %} 
   def write(slice : Slice(UInt8)) : Nil
+  {% end %}
     iov = LibMongoC::IOVec.new
     iov.ion_base = slice.to_unsafe
     iov.ion_len = slice.bytesize.to_u64
@@ -147,7 +152,7 @@ class Mongo::GridFS::File < IO
     check_error
     len
   end
-
+  {% end %}
   private def check_error
     if LibMongoC.gridfs_file_error(@handle, out error)
       raise BSON::BSONError.new(pointerof(error))

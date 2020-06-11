@@ -33,9 +33,9 @@ module Mongo
     when LibMongoC::LogLevel::INFO
       Log.info { msg }
     when LibMongoC::LogLevel::DEBUG
-      Log.verbose { msg }
-    when LibMongoC::LogLevel::TRACE
       Log.debug { msg }
+    when LibMongoC::LogLevel::TRACE
+      Log.trace { msg }
     else
       Log.info { msg }
     end
