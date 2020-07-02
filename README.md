@@ -6,7 +6,7 @@ This library provides binding for MongoDB C Driver. The goal is to provide a dri
 
 # Status
 
-*Release*
+*DEPRECATED* Use the crystal native library https://github.com/elbywan/cryomongo
 
 # Requirements
 

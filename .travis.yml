@@ -19,4 +19,4 @@ before_install:
 
 # Uncomment the following if you'd like Travis to run specs and check code formatting
 script:
-- docker-compose run test
+  - docker-compose run test

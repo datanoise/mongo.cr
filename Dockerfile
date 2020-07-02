@@ -1,4 +1,4 @@
-FROM crystallang/crystal:0.35.0
+FROM crystallang/crystal:0.35.1
 RUN apt-get update \
   && apt-get -y install cmake libssl-dev libsasl2-dev wget \
   && rm -rf /var/lib/apt/lists/*
