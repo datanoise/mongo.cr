@@ -1,6 +1,8 @@
 name: mongo
 version: 0.4.0
 
+crystal: ">= 0.35.0, < 2.0.0"
+
 authors: []
 
 description: |
@@ -20,8 +22,10 @@ libraries:
   libmongoc: "~> 1.16.2"
 
 license: MIT
-crystal: 0.35.0
 
 development_dependencies:
   dotenv:
-    github: gdotdesign/cr-dotenv
+    # github: gdotdesign/cr-dotenv
+    # until https://github.com/gdotdesign/cr-dotenv/pull/26 is merged
+    github: kalinon/cr-dotenv
+    branch: patch-1
