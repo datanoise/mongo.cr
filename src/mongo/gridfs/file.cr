@@ -1,5 +1,5 @@
 class Mongo::GridFS::File < IO
-  #include IO
+  # include IO
   # breaking change moved IO from module to class in release 0.24.1
 
   property! timeout_msec
@@ -128,26 +128,31 @@ class Mongo::GridFS::File < IO
     iov.ion_len = slice.bytesize.to_u64
 
     len = LibMongoC.gridfs_file_readv(self, pointerof(iov),
-                                      LibC::SizeT.new(1),
-                                      LibC::SizeT.new(0),
-                                      @timeout_msec.to_u32)
+      LibC::SizeT.new(1),
+      LibC::SizeT.new(0),
+      @timeout_msec.to_u32)
     check_error
     len
   end
 
+  {% begin %}
   # Performs a gathered write to the underlying gridfs file.
+  {% if compare_versions(Crystal::VERSION, "0.35.0-0") >= 0 %}
+  def write(slice : Slice(UInt8)) : Int64
+  {% else %} 
   def write(slice : Slice(UInt8)) : Nil
+  {% end %}
     iov = LibMongoC::IOVec.new
     iov.ion_base = slice.to_unsafe
     iov.ion_len = slice.bytesize.to_u64
 
     len = LibMongoC.gridfs_file_writev(self, pointerof(iov),
-                                       LibC::SizeT.new(1),
-                                       @timeout_msec.to_u32)
+      LibC::SizeT.new(1),
+      @timeout_msec.to_u32)
     check_error
     len
   end
-
+  {% end %}
   private def check_error
     if LibMongoC.gridfs_file_error(@handle, out error)
       raise BSON::BSONError.new(pointerof(error))

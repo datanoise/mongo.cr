@@ -1,0 +1,22 @@
+language: crystal
+services:
+  - docker
+
+env:
+  global:
+    - DOCKER_COMPOSE_VERSION=1.25.5
+    - MONGODB_HOST=127.0.0.1
+    - MONGODB_PORT=27017
+    - MONGODB_USER=root
+    - MONGODB_PASS=example
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - sudo apt-get -y install libmongoc-dev libbson-dev
+
+# Uncomment the following if you'd like Travis to run specs and check code formatting
+script:
+  - docker-compose run test

@@ -1,11 +1,7 @@
 class Mongo::Host
-  @host : String
-  @port : UInt16
-  @family : Int32
-
-  getter host
-  getter port
-  getter family
+  getter host : String
+  getter port : UInt16
+  getter family : Int32
 
   def initialize(@host, @port, @family)
   end

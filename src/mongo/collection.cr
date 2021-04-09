@@ -6,7 +6,7 @@ class Mongo::Collection
   @database : Mongo::Database?
   @handle : LibMongoC::Collection
   @owned : Bool
-  @valid : Bool
+  @valid : Bool = false
   getter database
 
   def initialize(@database, @handle : LibMongoC::Collection, @owned = true)
@@ -21,11 +21,17 @@ class Mongo::Collection
 
   def invalidate
     @valid = false
-    LibMongoC.collection_destroy(@handle)
+    LibMongoC.collection_destroy(@handle) if @owned
+    @owned = false
   end
 
-  def finalize
-    LibMongoC.collection_destroy(@handle) if @owned && @valid
+  # Commenting prevents freeing bson pointers twice and crashing the program.
+  # def finalize
+  #   LibMongoC.collection_destroy(@handle) if @owned && @valid
+  # end
+
+  def watch(pipeline = BSON.new, options = BSON.new)
+    ChangeStream.new LibMongoC.collection_watch(self, pipeline.to_bson, options.to_bson)
   end
 
   # This method shall execute an aggregation query on the underlying 'Collection'
@@ -45,8 +51,8 @@ class Mongo::Collection
   def command(command, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
               skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.collection_command(self, flags, skip.to_u32,
-                                            limit.to_u32, batch_size.to_u32,
-                                            command.to_bson, fields.to_bson, prefs)
+      limit.to_u32, batch_size.to_u32,
+      command.to_bson, fields.to_bson, prefs)
   end
 
   # This method shall execute a command on a collection.
@@ -61,9 +67,9 @@ class Mongo::Collection
   # This is a simplified interface to command that returns the first result document.
   def command_simple(command, prefs = nil)
     if LibMongoC.collection_command_simple(self, command.to_bson, prefs, out reply, out error)
-        repl = BSON.copy_from pointerof(reply)
-        LibBSON.bson_destroy(pointerof(reply))
-        repl
+      repl = BSON.copy_from pointerof(reply)
+      LibBSON.bson_destroy(pointerof(reply))
+      repl
     else
       raise BSON::BSONError.new(pointerof(error))
     end
@@ -74,7 +80,7 @@ class Mongo::Collection
             skip = 0, limit = 0, opts = nil, prefs = nil)
     if opts
       ret = LibMongoC.collection_count_with_opts(self, flags, query.to_bson, skip.to_i64,
-                                                 limit.to_i64, opts.to_bson, prefs, out error1)
+        limit.to_i64, opts.to_bson, prefs, out error1)
       raise BSON::BSONError.new(pointerof(error1)) if ret == -1
       ret
     else
@@ -132,7 +138,7 @@ class Mongo::Collection
   def find(query, fields = BSON.new, flags = LibMongoC::QueryFlags::NONE,
            skip = 0, limit = 0, batch_size = 0, prefs = nil)
     Cursor.new LibMongoC.collection_find(self, flags, skip.to_u32, limit.to_u32, batch_size.to_u32,
-                                         query.to_bson, fields.to_bson, prefs)
+      query.to_bson, fields.to_bson, prefs)
   end
 
   # This method shall execute a query on the underlying collection.
@@ -169,7 +175,7 @@ class Mongo::Collection
   def insert_bulk(documents, flags = LibMongoC::InsertFlags::NONE, write_concern = nil)
     return if documents.empty?
 
-    docs = Pointer(LibBSON::BSON).malloc(documents.size) {|idx| documents[idx].to_bson.to_unsafe}
+    docs = Pointer(LibBSON::BSON).malloc(documents.size) { |idx| documents[idx].to_bson.to_unsafe }
     unless LibMongoC.collection_insert_bulk(self, flags, docs, documents.size.to_u32, write_concern, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
@@ -217,11 +223,11 @@ class Mongo::Collection
   # or `remove` arguments are required.
   def find_and_modify(query, update, sort = nil, fields = nil, remove = false, upsert = false, new = false)
     unless LibMongoC.collection_find_and_modify(self, query.to_bson, sort.to_bson,
-        update.to_bson, fields.to_bson, remove, upsert, new, out reply, out error)
+             update.to_bson, fields.to_bson, remove, upsert, new, out reply, out error)
       raise BSON::BSONError.new(pointerof(error))
     end
     doc = BSON.copy_from pointerof(reply)
-	LibBSON.bson_destroy(pointerof(reply))
+    LibBSON.bson_destroy(pointerof(reply))
     value = doc["value"]
     doc.invalidate
     return nil unless value.is_a?(BSON)
@@ -306,6 +312,10 @@ class Mongo::Collection
   # within the bulk operation.
   def create_bulk_operation(ordered = false, write_concern = nil)
     BulkOperation.new LibMongoC.collection_create_bulk_operation(self, ordered, write_concern)
+  end
+
+  def watch(pipeline : BSON = BSON.new, opts : BSON? = nil)
+    ChangeStream.new LibMongoC.collection_watch(self, pipeline, opts)
   end
 
   def to_unsafe

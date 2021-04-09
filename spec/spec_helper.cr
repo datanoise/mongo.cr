@@ -1,5 +1,18 @@
+require "dotenv"
+Dotenv.load if File.exists?(".env")
+
+def mongo_test_uri
+  URI.new(
+    scheme: "mongodb",
+    host: ENV["MONGODB_HOST"]? || "localhost",
+    port: (ENV["MONGODB_PORT"]? || 27017).to_i,
+    user: ENV["MONGODB_USER"]? || "root",
+    password: ENV["MONGODB_PASS"]? || ""
+  ).to_s
+end
+
 def create_client
-  client = Mongo::Client.new("mongodb://localhost")
+  client = Mongo::Client.new(mongo_test_uri)
   client.setup_stream
   client
 end
@@ -29,5 +42,3 @@ def with_collection
     yield col
   end
 end
-
-

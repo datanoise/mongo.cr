@@ -24,6 +24,10 @@ class BSON
       code == other.code && scope == other.scope
     end
 
+    def to_json(json : JSON::Builder)
+      json.string code
+    end
+
     def ==(other)
       false
     end

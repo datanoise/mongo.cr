@@ -15,10 +15,14 @@ describe Mongo::Collection do
       col.insert doc4
       col.count.should eq(4)
 
-      pipeline = [{"$match" => {"status" => "A"}},
-                  {"$group" => {"_id" => "$cust_id", "total" => {"$sum" => "$amount"}}}].to_bson
+      pipeline = [
+        {"$match" => {"status" => "A"}},
+        {"$group" => {"_id" => "$cust_id", "total" => {"$sum" => "$amount"}}},
+        {"$sort" => {"total": 1}},
+      ].to_bson
       cur = col.aggregate(pipeline)
-      cur.to_a.to_s.should eq("[{ \"_id\" : \"B212\", \"total\" : 200 }, { \"_id\" : \"A123\", \"total\" : 750 }]")
+      s = "[{ \"_id\" : \"A123\", \"total\" : 750 }, { \"_id\" : \"B212\", \"total\" : 200 }]"
+      cur.to_a.sort { |a, b| a["_id"].to_s <=> b["_id"].to_s }.to_s.should eq(s)
     end
   end
 
@@ -69,12 +73,10 @@ describe Mongo::Collection do
 
   it "should be able to insert in bulk" do
     with_collection do |col|
-
       docs = [{"name" => "Bob"}, {"name" => "Joe"}, {"name" => "Steve"}]
       col.insert_bulk docs
 
       col.count.should eq(3)
-
     end
   end
 
