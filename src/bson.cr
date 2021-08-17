@@ -204,6 +204,14 @@ class BSON
     LibBSON.bson_append_document(handle, key, key.bytesize, value)
   end
 
+  def []=(key : String, value : Hash(String,Field))
+    LibBSON.bson_append_document(handle, key, key.bytesize, value.to_bson)
+  end
+  def []=(key : String, value : Array(Field))
+    LibBSON.bson_append_array(handle, key, key.bytesize, value.to_bson)
+  end
+
+
   def []=(key, value : Regex)
     modifiers = value.options
     options =

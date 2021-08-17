@@ -1,10 +1,10 @@
-require "logger"
+require "log"
 require "./bson"
 require "./mongo/*"
 require "./mongo/gridfs/*"
 
 module Mongo
-  @@logger = Logger.new(STDIN)
+  @@logger = ::Log.for("db")
 
   def self.logger
     @@logger
@@ -27,24 +27,22 @@ module Mongo
   end
 
   protected def self.log(level, domain, msg)
-    log_level =
       case level
       when LibMongoC::LogLevel::ERROR
-        Logger::Severity::ERROR
+        logger.try &.error {msg}
       when LibMongoC::LogLevel::CRITICAL
-        Logger::Severity::FATAL
+        logger.try &.fatal {msg}
       when LibMongoC::LogLevel::WARNING
-        Logger::Severity::WARN
+        logger.try &.warn {msg}
       when LibMongoC::LogLevel::INFO
-        Logger::Severity::INFO
+        logger.try &.info {msg}
       when LibMongoC::LogLevel::DEBUG
-        Logger::Severity::DEBUG
+        logger.try &.debug {msg}
       when LibMongoC::LogLevel::TRACE
-        Logger::Severity::DEBUG
+        logger.try &.trace {msg}
       else
-        Logger::Severity::INFO
+        logger.try &.notice {msg}
       end
-    logger.try &.log(log_level, msg, domain)
   end
 
   LibMongoC.log_set_handler ->(level, domain, msg, user_data) {

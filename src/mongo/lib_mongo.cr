@@ -307,7 +307,14 @@ lib LibMongoC
     padding: Void*[7]
   end
 
-  alias StreamInitiator = (Uri, HostList, Void*, BSONError*) -> Stream*?
+  #alias StreamInitiator = (Uri, HostList, Void*, BSONError*) -> Stream*?
+
+  struct StreamInitiator
+    uri: Uri
+    host: HostList
+    user_data: Void*
+    error: BSONError*
+  end
 
   alias GFSFile = Void*
 
