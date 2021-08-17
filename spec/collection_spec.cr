@@ -16,7 +16,8 @@ describe Mongo::Collection do
       col.count.should eq(4)
 
       pipeline = [{"$match" => {"status" => "A"}},
-                  {"$group" => {"_id" => "$cust_id", "total" => {"$sum" => "$amount"}}}].to_bson
+                  {"$group" => {"_id" => "$cust_id", "total" => {"$sum" => "$amount"}}},
+                  {"$sort"=>{"_id"=> -1}}].to_bson
       cur = col.aggregate(pipeline)
       cur.to_a.to_s.should eq("[{ \"_id\" : \"B212\", \"total\" : { \"$numberInt\" : \"200\" } }, { \"_id\" : \"A123\", \"total\" : { \"$numberInt\" : \"750\" } }]")
     end
